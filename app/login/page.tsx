@@ -1,4 +1,3 @@
-// app/login/page.tsx
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,20 +16,54 @@ export default function LoginPage() {
     });
     const data = await res.json();
     if (res.ok) {
-      router.push('/traffic-list');
+      router.push('/');
     } else {
       setError(data.message);
     }
   };
 
   return (
-    <div className="p-10 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Login</h1>
-      <input className="border p-2 w-full mb-2" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
-      <input className="border p-2 w-full mb-2" placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      <button className="bg-blue-500 text-white px-4 py-2" onClick={handleLogin}>Login</button>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-      <p className="mt-2 text-sm">Don't have an account? <a href="/signup" className="text-blue-600 underline">Sign up</a> before trying to log in again.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-100 via-white to-blue-100 px-4">
+      <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-8">
+        <h1 className="text-3xl font-extrabold text-blue-700 mb-8 text-center">Welcome Back</h1>
+
+        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+        <input
+          id="username"
+          type="text"
+          autoComplete="username"
+          placeholder="Your username"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+          className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+        />
+
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input
+          id="password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+        />
+
+        <button
+          onClick={handleLogin}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md shadow-sm transition"
+        >
+          Log In
+        </button>
+
+        {error && (
+          <p className="text-red-600 mt-4 text-center font-medium">
+            {error}
+          </p>
+        )}
+
+        
+      </div>
     </div>
   );
 }

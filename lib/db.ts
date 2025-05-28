@@ -1,11 +1,14 @@
 import { Pool } from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const pool = new Pool({
-  user: 'wannawut',
-  host: '127.0.0.1',
-  database: 'postgres',
-  password: 'Wd@45799',
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: parseInt(process.env.DB_PORT || '5432', 10),
 });
 
 // types/index.ts

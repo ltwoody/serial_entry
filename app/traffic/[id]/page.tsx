@@ -1,7 +1,10 @@
+
+export const dynamic = 'force-dynamic';
+
+
 import { notFound } from 'next/navigation';
 import { pool } from '@/lib/db';
 import TrafficDetailClient from '@/app/components/TrafficDetailClient';
-
 
 interface TrafficRecord {
   id: number;
@@ -21,10 +24,14 @@ interface Props {
 export default async function TrafficDetail({ params }: Props) {
   const client = await pool.connect();
 
+
   try {
+
+    const id =  Number(params.id)
+    
     const res = await client.query<TrafficRecord>(
       'SELECT * FROM traffictable WHERE id = $1',
-      [params.id]
+      [id]
     );
 
     if (res.rowCount === 0) {
