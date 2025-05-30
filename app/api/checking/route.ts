@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
+
 export async function POST(req: NextRequest) {
   const { SerialNo } = await req.json();
   const client = await pool.connect();
@@ -11,13 +12,13 @@ export async function POST(req: NextRequest) {
 
     // Perform case-insensitive comparison using LOWER()
     const dup = await client.query(
-      'SELECT 1 FROM traffictable WHERE LOWER("SerialNo") = $1',
+      'SELECT 1 FROM job_report WHERE LOWER("serial_no") = $1',
       [normalizedSerial]
     );
 
-    if (dup.rowCount > 0) {
+    if ((dup as { rowCount: number }).rowCount > 0) {
       return NextResponse.json(
-        { message: 'SerialNo already in use', isValid: false },
+        { message: 'serial_no already in use', isValid: false },
         { status: 400 }
       );
     } else {

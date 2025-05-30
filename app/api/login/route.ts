@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import bcrypt from 'bcrypt';
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ✅ Set auth cookie if login is successful
-    const response = NextResponse.json({ message: 'Login successful' });
+    const response = NextResponse.json({ message: 'Login successful' , role: user.role});
 
     response.cookies.set({
       name: 'auth',
@@ -36,6 +37,16 @@ export async function POST(req: NextRequest) {
     response.cookies.set({
   name: 'user',
   value: encodeURIComponent(user.username), // encode just in case
+  httpOnly: false, // must be accessible by client JS
+  path: '/',
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 60 * 60 * 24,
+});
+
+response.cookies.set({
+  name: 'role',
+  value: encodeURIComponent(user.role), // encode just in case
   httpOnly: false, // must be accessible by client JS
   path: '/',
   secure: process.env.NODE_ENV === 'production',

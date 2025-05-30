@@ -3,13 +3,13 @@
 import { useState } from 'react';
 
 export default function CheckingPage() {
-  const [serialNo, setSerialNo] = useState('');
+  const [serial_no, setSerialNo] = useState('');
   const [message, setMessage] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleCheck = async () => {
-    if (!serialNo.trim()) {
+    if (!serial_no.trim()) {
       setMessage('Please enter a Serial Number.');
       setIsValid(false);
       return;
@@ -23,7 +23,7 @@ export default function CheckingPage() {
       const res = await fetch('/api/checking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ SerialNo: serialNo.trim() }),
+        body: JSON.stringify({ SerialNo: serial_no.trim() }),
       });
 
       const data = await res.json();
@@ -36,7 +36,7 @@ export default function CheckingPage() {
         setIsValid(false);
       }
     } catch (error) {
-      setMessage('Error checking serial number.');
+      setMessage('Error checking serial number.: '+error);
       setIsValid(false);
     } finally {
       setLoading(false);
@@ -50,7 +50,7 @@ export default function CheckingPage() {
       <input
         type="text"
         placeholder="Enter Serial Number"
-        value={serialNo}
+        value={serial_no}
         onChange={(e) => setSerialNo(e.target.value)}
         className="border border-gray-300 rounded px-4 py-2 w-full mb-4"
       />

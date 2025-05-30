@@ -1,7 +1,26 @@
+'use client';
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+
+// Utility to read cookie
+function getCookieValue(name: string): string | null {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
 
 export default function HomePage() {
+
+  const [user, setUser] = useState({ username: '', role: '' });
+
+  useEffect(() => {
+    const username = getCookieValue('user') || '';
+    const role = getCookieValue('role') || '';
+    setUser({ username, role });
+  }, []);
+
+  
+  const isAdmin = user.role === "admin" || user.username === "wdadmin";
   return (
    
       
@@ -13,6 +32,8 @@ export default function HomePage() {
         </h2>
 
         <ul className="flex flex-col gap-4">
+           {/* Only show if user is admin or wdadmin */}
+           {isAdmin && (
           <SidebarLink href="/signup" label="Create User" icon={
             <svg
               className="w-5 h-5 mr-3 text-blue-500"
@@ -23,10 +44,12 @@ export default function HomePage() {
               strokeLinejoin="round"
               viewBox="0 0 24 24"
             >
+              
               <path d="M16 21v-2a4 4 0 00-8 0v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
           } />
+        )}
 
           <SidebarLink href="/checking" label="Serial Check" icon={
             <svg
@@ -38,11 +61,11 @@ export default function HomePage() {
               strokeLinejoin="round"
               viewBox="0 0 24 24"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              <path  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
           } />
 
-          <SidebarLink href="/create-branch-traffic" label="Add New" icon={
+          <SidebarLink href="/create-job" label="Add New" icon={
             <svg
               className="w-5 h-5 mr-3 text-blue-500"
               fill="none"
@@ -57,7 +80,7 @@ export default function HomePage() {
             </svg>
           } />
 
-          <SidebarLink href="/traffic-list" label="Report" icon={
+          <SidebarLink href="/job-report" label="Report" icon={
             <svg
               className="w-5 h-5 mr-3 text-blue-500"
               fill="none"
@@ -75,20 +98,23 @@ export default function HomePage() {
             <svg
               className="w-5 h-5 mr-3 text-blue-500"
               fill="none"
+              clip="evenodd"
               stroke="currentColor"
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
               viewBox="0 0 24 24"
             >
-              <path d="M8.25 10.875a2.625 2.625 0 1 1 5.25 0 2.625 2.625 0 0 1-5.25 0Z" />
-              <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.125 4.5a4.125 4.125 0 1 0 2.338 7.524l2.007 2.006a.75.75 0 1 0 1.06-1.06l-2.006-2.007a4.125 4.125 0 0 0-3.399-6.463Z" clip-rule="evenodd" />
+              
+              <path  d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.125 4.5a4.125 4.125 0 1 0 2.338 7.524l2.007 2.006a.75.75 0 1 0 1.06-1.06l-2.006-2.007a4.125 4.125 0 0 0-3.399-6.463Z"  />
             </svg>
           } />
 
           
 
 
+          {/* Only show if user is admin or wdadmin */}
+           {isAdmin && (
           <SidebarLink href="/product-master" label="Product Master" icon={
             <svg
             xmlns="http://www.w3.org/2000/svg" 
@@ -103,6 +129,7 @@ export default function HomePage() {
               <path   d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
           } />
+        )}
         </ul>
       </nav>
 
