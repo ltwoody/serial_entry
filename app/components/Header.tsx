@@ -3,7 +3,11 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export default function Header() {
+type HeaderProps = {
+  onMenuClick: () => void;
+};
+
+export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const [username, setUsername] = useState<string | null>(null);
@@ -43,8 +47,19 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full p-4 bg-blue-400 shadow flex justify-between items-center">
+    <header className="sticky top-0 z-50 w-full p-4 bg-blue-400  flex justify-between items-center">
       <div className="flex items-center space-x-4">
+       
+
+        {/* Menu button always shown */}
+        <button
+  onClick={onMenuClick}
+  className="text-white text-2xl" // ← removed md:hidden
+  aria-label="Toggle sidebar"
+>
+  ☰
+</button>
+
         {pathname !== '/' && (
           <button
             onClick={handleBack}
