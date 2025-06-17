@@ -14,10 +14,15 @@ export async function GET(req: NextRequest) {
 
   // For demo, assume you store username in 'user' cookie
   const username = req.cookies.get('user')?.value;
+  const role = req.cookies.get('role')?.value;
 
   if (!username) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  return NextResponse.json({ username });
+  if (!role) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  return NextResponse.json({ username ,role});
 }

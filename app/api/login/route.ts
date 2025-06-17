@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   const client = await pool.connect();
 
   try {
-    const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+    const result = await client.query('SELECT * FROM user_table WHERE username = $1', [username]);
 
     if (result.rowCount === 0) {
       return NextResponse.json({ message: 'Invalid credentials or user not found.' }, { status: 401 });

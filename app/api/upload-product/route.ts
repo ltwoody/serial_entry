@@ -3,7 +3,7 @@ import { parse } from 'csv-parse/sync';
 import * as xlsx from 'xlsx';
 import { pool } from '@/lib/db';
 
-const EXPECTED_HEADERS = ['product_code', 'brand', 'product_name'];
+const EXPECTED_HEADERS = ['oid','product_code', 'brand_name', 'product_name'];
 
 function validateHeaders(actualHeaders: string[]) {
   // Check that both arrays have same length and same values (case sensitive)
@@ -71,9 +71,9 @@ export async function POST(req: Request) {
       // Insert new rows
       for (const row of rows) {
         await client.query(
-          `INSERT INTO product_master (product_code, brand, product_name)
-           VALUES ($1, $2, $3)`,
-          [row.product_code, row.brand, row.product_name]
+          `INSERT INTO product_master (oid,product_code, brand_name, product_name)
+           VALUES ($1, $2, $3 , $4)`,
+          [row.oid ,row.product_code, row.brand_name, row.product_name]
         );
       }
 

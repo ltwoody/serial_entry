@@ -118,15 +118,15 @@ export default function UploadProductPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-200 via-blue-300 to-blue-400 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-white-200 via-white-300 to-white-700 p-6">
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-8">
-        <h1 className="text-3xl font-extrabold mb-6 text-center text-blue-700">
+        <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-700">
           Upload Product Master
         </h1>
 
         <label
           htmlFor="file-upload"
-          className="flex flex-col items-center justify-center border-2 border-dashed border-blue-500 rounded-lg cursor-pointer py-12 text-blue-600 hover:border-blue-700 transition"
+          className="flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer py-12 text-gray-700 hover:border-gray-300 transition"
         >
           {file ? (
             <span className="font-medium">{file.name}</span>
@@ -147,7 +147,7 @@ export default function UploadProductPage() {
                 />
               </svg>
               <span className="text-lg font-semibold">Click to select or drag your file</span>
-              <span className="text-sm text-blue-500 mt-2">Accepted: .csv, .xlsx, .xls</span>
+              <span className="text-sm text-gray-500 mt-2">Accepted: .csv, .xlsx, .xls</span>
             </>
           )}
           <input
@@ -161,7 +161,7 @@ export default function UploadProductPage() {
 
         <button
           onClick={handleUpload}
-          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md transition"
+          className="mt-6 w-full bg-gray-500 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg shadow-md transition"
         >
           Upload
         </button>

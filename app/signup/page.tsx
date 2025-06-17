@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
+  const [firstname, setName] = useState('');
+  const [lastname, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,7 +22,7 @@ export default function SignupPage() {
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, username, password }),
+      body: JSON.stringify({ username, password ,firstname,lastname}),
     });
 
     const data = await res.json();
@@ -42,12 +43,22 @@ export default function SignupPage() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Firstname</label>
             <input
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your full name"
-              value={name}
+              value={firstname}
               onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Lastname</label>
+            <input
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your full name"
+              value={lastname}
+              onChange={(e) => setLastName(e.target.value)}
             />
           </div>
 
@@ -85,10 +96,10 @@ export default function SignupPage() {
         </div>
 
         <button
-          className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+          className="mt-6 w-full bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-700 transition"
           onClick={handleSignup}
         >
-          ✅ Create Account
+          Create Account
         </button>
 
         <button

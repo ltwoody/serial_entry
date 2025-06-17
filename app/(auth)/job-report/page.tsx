@@ -1,21 +1,23 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 
 const RECORDS_PER_PAGE = 10;
 
 interface JobRecord {
-  reportid: string;
-  serial_no: string;
-  job_date: Date;
-  supplier_name: string;
+  u_id: string;
+  serial_number: string;
   received_date: Date;
+  supplier: string;
+  date_receipt: Date;
   product_code: string;
-  brand: string;
+  brand_name: string;
   job_no: string;
   product_name: string;
-  status: string;
-  round: string;
+  replace_serial: string;
+  count_round: number;
+  rowuid: string;
 }
 
 export default function JobReport() {
@@ -23,20 +25,48 @@ export default function JobReport() {
   
   const router = useRouter();
 
+  
+  const [role, setRole] = useState<string | null>(null);
+
+  
+
+
+  
+  useEffect(() => {
+      async function fetchUser() {
+        try {
+          const res = await fetch('/api/me');
+          if (res.ok) {
+            const data = await res.json();
+            
+            setRole(data.role);
+          } else {
+            
+            setRole(null);
+          }
+        } catch {
+          
+          setRole(null);
+        }
+      }
+      fetchUser();
+    }, []);
+
   // States
   const [records, setRecords] = useState<JobRecord[]>([]);
   const [filters, setFilters] = useState({
-    reportid: '',
-    serial_no: '',
-    job_date: '',
-    supplier_name: '',
+    u_id: '',
+    serial_number: '',
     received_date: '',
+    supplier: '',
+    date_receipt: '',
     product_code: '',
-    brand: '',
-    jobno: '',
+    brand_name: '',
+    job_no: '',
     product_name: '',
-    status: '',
-    round: '',
+    replace_serial: '',
+    count_round: '',
+    rowuid: '',
   });
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,6 +103,24 @@ export default function JobReport() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
+  // Delete function
+  const handleDelete = async (rowuid: string) => {
+  if (!confirm('Are you sure you want to delete this record?')) return;
+
+  try {
+    const res = await fetch(`/api/delete-job/${rowuid}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    // Re-fetch data after delete
+    fetchData();
+  } catch (err) {
+    console.error('Delete failed:', err);
+    alert('Failed to delete record');
+  }
+};
 
   // Handle real-time search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,16 +133,17 @@ export default function JobReport() {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     return (
-      rec.reportid?.toLowerCase().includes(term) ||
-      rec.serial_no?.toLowerCase().includes(term) ||
+      rec.u_id?.toLowerCase().includes(term) ||
+      rec.serial_number?.toLowerCase().includes(term) ||
 
-      rec.supplier_name?.toLowerCase().includes(term) ||
+      rec.supplier?.toLowerCase().includes(term) ||
 
       rec.product_code?.toString().toLowerCase().includes(term) ||
-      rec.brand?.toString().toLowerCase().includes(term) ||
+      rec.brand_name?.toString().toLowerCase().includes(term) ||
       rec.job_no?.toLowerCase().includes(term) ||
       rec.product_name?.toLowerCase().includes(term) ||
-      rec.status?.toLowerCase().includes(term) 
+      rec.replace_serial?.toLowerCase().includes(term) ||
+      rec.rowuid?.toLowerCase().includes(term)
     );
 
     
@@ -111,12 +160,13 @@ export default function JobReport() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-extrabold mb-6">Job Report</h1>
+  <div className="max-w-7xl mx-auto p-6 bg-gray-100 min-h-screen">
+    <div className="bg-white p-8 rounded-xl shadow-md">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Job Report</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-6">
-        {['job_no', 'serial_no', 'supplier_name'].map((field) => (
+        {['serial_number', 'supplier'].map((field) => (
           <input
             key={field}
             type="text"
@@ -124,102 +174,143 @@ export default function JobReport() {
             placeholder={`Filter by ${field}`}
             value={filters[field] ?? ''}
             onChange={handleChange}
-            className="flex-1 min-w-[150px] rounded-md border border-gray-300 px-4 py-2"
+            className="flex-1 min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         ))}
         <button
           onClick={fetchData}
-          className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
+          className="bg-gray-500 text-white px-5 py-2 rounded-md text-sm hover:bg-gray-700"
         >
           Search
         </button>
         <button
           onClick={() => {
-            setFilters({ reportid:'',
-              serial_no: '',
-    job_date: '',
-    supplier_name: '',
-    received_date: '',
-    product_code: '',
-    brand: '',
-    jobno: '',
-    product_name: '',
-    status: '',
-    round: '' });
+            setFilters({
+              u_id: '',
+              serial_number: '',
+              received_date: '',
+              supplier: '',
+              date_receipt: '',
+              product_code: '',
+              brand_name: '',
+              job_no: '',
+              product_name: '',
+              replace_serial: '',
+              count_round: '',
+              rowuid: '',
+            });
             setRecords([]);
             setHasQueried(false);
             setSearchTerm('');
           }}
-          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+          className=" bg-red-400 text-white px-5 py-2 rounded-md text-sm hover:bg-red-600"
         >
           Clear
         </button>
       </div>
 
-      {/* New: Real-time Search Bar */}
+      {/* Search Bar */}
       {hasQueried && (
-        <div className="mb-4">
+        <div className="mb-6">
           <input
             type="text"
             placeholder="Search records on this page..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full rounded-md border border-gray-300 px-4 py-2"
+            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
       )}
 
-      {/* Table */}
+      {/* Table or Message */}
       {!hasQueried ? (
-        <p className="text-gray-500 text-center py-10">Please filter or show all records.</p>
+        <p className="text-gray-500 text-center py-12 italic">Please filter or show all records.</p>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200 text-xs table-auto">
-              <thead className="bg-gray-500 text-center text-nowrap">
-                <tr 
-                >
-                  {['Job No.', 'Serial', 'Job Date', 'Received Date', 'Supplier', 'Brand', 'S Code','Product Name','Status','Round'].map((header) => (
+          <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-200">
+                <tr>
+                  {['Job No.', 'Serial', 'Date Receipt', 'Received Date', 'Supplier', 'Brand', 'S Code', 'Product Name', 'Replace Serial', 'Round'].map((header) => (
                     <th
                       key={header}
-                      className="px-6 py-3 text-left text-xs  text-gray-100 font-extrabold uppercase tracking-wider"
+                      className="px-4 py-3  font-semibold text-xs text-center text-gray-700 uppercase tracking-wide"
                     >
-                      {header}
+                      {header} 
+                      
                     </th>
+
+                    
                   ))}
+                  <th className="px-4 py-3  text-xs text-gray-700 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-100">
                 {currentRecords.length > 0 ? (
                   currentRecords.map((rec, idx) => (
                     <tr
-                      key={idx}
-                      className="hover:bg-blue-50 cursor-pointer first:bg-blue-100 odd:bg-white even:bg-gray-200 text-center"
-                      onClick={() => 
-                      { console.log('Navigating to: ', rec.reportid)
-                        router.push(`/detail_data/${rec.reportid}`)}
-                      }
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">{rec.job_no}</td>
-                       {/*px-6 py-4 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]*/}
-                      <td className="px-6 py-4 whitespace-normal break-words max-w-sm">{rec.serial_no}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-  {rec.job_date ? new Date(rec.job_date).toLocaleDateString('en-CA') : ''}
+  key={idx}
+  className={`text-center cursor-pointer ${
+    idx % 2 === 0
+      ? ' bg-white hover:bg-gray-200'
+      : 'bg-gray-100 hover:bg-gray-300'
+  }`}
+>
+                      <td className="px-4 py-3">{rec.job_no}</td>
+                      <td className="px-4 py-3 break-words max-w-sm">{rec.serial_number}</td>
+                      <td className="px-4 py-3">{rec.date_receipt ? new Date(rec.date_receipt).toLocaleDateString('en-CA') : ''}</td>
+                      <td className="px-4 py-3">{rec.received_date ? new Date(rec.received_date).toLocaleDateString('en-CA') : ''}</td>
+                      <td className="px-4 py-3">{rec.supplier}</td>
+                      <td className="px-4 py-3">{rec.brand_name}</td>
+                      <td className="px-4 py-3">{rec.product_code}</td>
+                      <td className="px-4 py-3">{rec.product_name}</td>
+                      <td className="px-4 py-3">{rec.replace_serial}</td>
+                      <td className="px-4 py-3">{rec.count_round}</td>
+                      {/* Add Edit & Delete buttons */}
+                     <td className="px-4 py-3">
+  <div className="flex items-center gap-3 text-gray-700">
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        router.push(`/detail_data/${rec.u_id}`);
+      }}
+      className="hover:text-blue-600"
+      title="View"
+    >
+      <Eye size={18} />
+    </button>
+
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        router.push(`/edit-job/${rec.rowuid}`);
+      }}
+      className="hover:text-yellow-600"
+      title="Edit"
+    >
+      <Pencil size={18} />
+    </button>
+
+    {role === 'admin' && ( 
+
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDelete(rec.rowuid);
+      }}
+      className="hover:text-red-600"
+      title="Delete"
+    >
+      <Trash2 size={18} />
+    </button>
+    )}
+  </div>
 </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-  {rec.received_date ? new Date(rec.received_date).toLocaleDateString('en-CA') : ''}
-</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{rec.supplier_name}</td>
-                      <td className="px-6 py-4">{rec.brand}</td>
-                      <td className="px-6 py-4">{rec.product_code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{rec.product_name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{rec.status}</td>
-                      <td className="px-6 py-4">{rec.round}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-gray-500">
+                    <td colSpan={10} className="text-center py-8 text-gray-400">
                       No records found.
                     </td>
                   </tr>
@@ -229,72 +320,63 @@ export default function JobReport() {
           </div>
 
           {/* Pagination */}
-          <nav className="flex justify-center mt-6 space-x-2">
-  <button
-    onClick={() => goToPage(currentPage - 1)}
-    disabled={currentPage === 1}
-    className="px-3 py-2 border rounded-md disabled:text-gray-400 disabled:border-gray-300"
-  >
-    Previous
-  </button>
+          <nav className="flex justify-center mt-6 space-x-1 text-sm">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-300 rounded disabled:text-gray-400 disabled:border-gray-200"
+            >
+              Previous
+            </button>
 
-  {/* First page */}
-  {currentPage > 2 && (
-    <>
-      <button
-        onClick={() => goToPage(1)}
-        className="px-3 py-2 border rounded-md text-gray-700 border-gray-300 hover:bg-gray-100"
-      >
-        1
-      </button>
-      {currentPage > 3 && <span className="px-2 py-2">...</span>}
-    </>
-  )}
+            {currentPage > 2 && (
+              <>
+                <button onClick={() => goToPage(1)} className="px-3 py-1 border rounded border-gray-300 hover:bg-gray-100">1</button>
+                {currentPage > 3 && <span className="px-2 py-1 text-gray-400">...</span>}
+              </>
+            )}
 
-  {/* Page window around current */}
-  {[-1, 0, 1].map((offset) => {
-    const page = currentPage + offset;
-    if (page > 0 && page <= totalPages) {
-      return (
-        <button
-          key={page}
-          onClick={() => goToPage(page)}
-          className={`px-3 py-2 border rounded-md ${
-            page === currentPage
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'text-gray-700 border-gray-300 hover:bg-gray-100'
-          }`}
-        >
-          {page}
-        </button>
-      );
-    }
-    return null;
-  })}
+            {[-1, 0, 1].map((offset) => {
+              const page = currentPage + offset;
+              if (page > 0 && page <= totalPages) {
+                return (
+                  <button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    className={`px-3 py-1 border rounded ${
+                      page === currentPage
+                        ? 'bg-gray-500 text-white border-gray-700'
+                        : 'border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              }
+              return null;
+            })}
 
-  {/* Last page */}
-  {currentPage < totalPages - 1 && (
-    <>
-      {currentPage < totalPages - 2 && <span className="px-2 py-2">...</span>}
-      <button
-        onClick={() => goToPage(totalPages)}
-        className="px-3 py-2 border rounded-md text-gray-700 border-gray-300 hover:bg-gray-100"
-      >
-        {totalPages}
-      </button>
-    </>
-  )}
+            {currentPage < totalPages - 1 && (
+              <>
+                {currentPage < totalPages - 2 && <span className="px-2 py-1 text-gray-400">...</span>}
+                <button onClick={() => goToPage(totalPages)} className="px-3 py-1 border rounded border-gray-300 hover:bg-gray-100">
+                  {totalPages}
+                </button>
+              </>
+            )}
 
-  <button
-    onClick={() => goToPage(currentPage + 1)}
-    disabled={currentPage === totalPages}
-    className="px-3 py-2 border rounded-md disabled:text-gray-400 disabled:border-gray-300"
-  >
-    Next
-  </button>
-</nav>
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border border-gray-300 rounded disabled:text-gray-400 disabled:border-gray-200"
+            >
+              Next
+            </button>
+          </nav>
         </>
       )}
     </div>
-  );
+  </div>
+);
+
 }

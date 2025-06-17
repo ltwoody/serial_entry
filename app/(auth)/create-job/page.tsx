@@ -1,18 +1,19 @@
 'use client';
-import { useState } from 'react';
+import { useState} from 'react';
 import { useRouter } from 'next/navigation';
 
 const fields = [
-  { name: 'serial_no', label: 'Serial No', type: 'text' },
-  { name: 'job_date', label: 'Job Date', type: 'date' },
-  { name: 'supplier_name', label: 'Supplier Name', type: 'text' },
+  { name: 'serial_number', label: 'Serial No', type: 'text' },
+  { name: 'date_receipt', label: 'Date Receipt', type: 'date' },
+  { name: 'supplier', label: 'Supplier Name', type: 'text' },
   { name: 'received_date', label: 'Received Date', type: 'date' },
   { name: 'product_code', label: 'Product Code', type: 'text' },
-  { name: 'brand', label: 'Brand', type: 'text' },
-  { name: 'job_no', label: 'Job No', type: 'text' },
   { name: 'product_name', label: 'Product Name', type: 'text' },
-  { name: 'status', label: 'Status', type: 'text' },
-  { name: 'round', label: 'Round', type: 'text' },
+  { name: 'brand_name', label: 'Brand', type: 'text' },
+  { name: 'job_no', label: 'Job No', type: 'text' },
+  { name: 'condition', label: 'Condition', type: 'text' },
+  { name: 'remark', label: 'Remark', type: 'text' },
+  { name: 'count_round', label: 'Round', type: 'number' },
 ];
 
 export default function CreateJob() {
@@ -23,6 +24,8 @@ export default function CreateJob() {
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  
 
   const handleSubmit = async () => {
     const payload = {
@@ -68,10 +71,10 @@ export default function CreateJob() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-50 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 p-6">
       <div className="bg-white shadow-2xl rounded-2xl p-10 w-full max-w-4xl">
-        <h1 className="text-3xl font-extrabold mb-8 text-center text-blue-900">
-          🚦 Create Job
+        <h1 className="text-3xl font-extrabold mb-8 text-center text-gray-700">
+           Create Job
         </h1>
 
         <form
@@ -94,6 +97,7 @@ export default function CreateJob() {
         const value = e.target.value;
         setForm({ ...form, [name]: value });
 
+         // Lookup by product_code
         if (name === 'product_code' && value.trim().length > 0) {
           try {
             const res = await fetch('/api/get-product', {
@@ -106,13 +110,13 @@ export default function CreateJob() {
               const data = await res.json();
               setForm((prevForm) => ({
                 ...prevForm,
-                brand: data.brand,
+                brand_name: data.brand_name,
                 product_name: data.product_name,
               }));
             } else {
               setForm((prevForm) => ({
                 ...prevForm,
-                brand: '',
+                brand_name: '',
                 product_name: '',
               }));
             }
@@ -120,26 +124,44 @@ export default function CreateJob() {
             console.error('Product lookup failed:', err);
           }
         }
-        if (name === 'job_no' && value.trim()) {
-      try {
-        const res = await fetch('/api/get-product', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ job_no: value }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setForm((prev) => ({ ...prev, round: data.round ?? '' }));
-        } else {
-          setForm((prev) => ({ ...prev, round: '' }));
+
+        
+
+       // Lookup by serial_number
+  if (name === 'serial_number' && value.trim().length > 0) {
+    try {
+      const res = await fetch('/api/get-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serial_number: value }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setForm((prev) => ({
+          ...prev,
+          count_round: data.count_round ?? '',
+        }));
+
+        // Optional: autofill u_id (if you're displaying it)
+        if (data.u_id) {
+          console.log('Fetched u_id:', data.u_id); // Debug or use as needed
         }
-      } catch (err) {
-        console.error(err);
+      } else {
+        if (data.message) {
+          console.warn(data.message);
+          setError(data.message);
+        }
+        setForm((prev) => ({
+          ...prev,
+          count_round: '',
+        }));
       }
+    } catch (err) {
+      console.error('Serial lookup failed:', err);
     }
-
-
-      }}
+  }
+}}
       className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
       placeholder={`Enter ${label}`}
     />
@@ -149,7 +171,7 @@ export default function CreateJob() {
           {/* Submit button spans both columns */}
           <button
             type="submit"
-            className="md:col-span-2 bg-blue-600 hover:bg-blue-700 transition text-white font-bold py-3 rounded-lg mt-4 shadow-lg"
+            className="md:col-span-2 bg-gray-500 hover:bg-gray-700 transition text-white font-bold py-3 rounded-lg mt-4 shadow-lg"
           >
             Submit Traffic
           </button>

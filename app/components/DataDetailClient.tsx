@@ -4,17 +4,24 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
 interface DataRecord {
-  reportid: number;
-  job_no: string;
-  job_date: Date;
-  received_date: string;
-  supplier_name: string;
-  brand: string;
+  u_id: string;
+  serial_number: string;
+  replace_serial: string;
+  received_date: Date;
+  supplier: string;
+  date_receipt: Date;
+  brand_name: string;
   product_code: string;
   product_name: string;
-  status: string;
-  round: number;
-  serial_no: string;
+  job_no: string;
+  condition: string;
+  remark: string;
+  count_round: string;
+  create_by: string;
+  update_by: string;
+  replace_code: string;
+  replace_product: string;
+  rowuid: string;
 }
 
 
@@ -42,7 +49,7 @@ export default function DataDetailClient({
             Back
           </button>
           <h1 className="text-xl font-bold text-gray-800">
-            📊 Job Detail - <span className="text-blue-600">ID {record.reportid}</span>
+            📊 Job Detail - <span className="text-blue-600">ID {record.u_id}</span>
           </h1>
         </div>
 
@@ -62,29 +69,35 @@ export default function DataDetailClient({
 
       <div className="bg-white rounded-2xl shadow-lg max-w-6xl mx-auto p-8">
         <h2 className="text-lg font-bold text-gray-800 mb-4">
-          🔄 Other Records in Job No: <span className="text-blue-600">{record.job_no}</span>
+          🔄 Other Records in Relation: <span className="text-blue-600">{record.u_id}</span>
         </h2>
         <div className="overflow-x-auto border rounded">
           <table className="min-w-full table-auto text-sm">
             <thead className="bg-gray-100 text-left">
               <tr>
-                <th className="px-4 py-2">Report ID</th>
+                <th className="px-4 py-2">Job Claim</th>
                 <th className="px-4 py-2">Round</th>
                 <th className="px-4 py-2">Serial</th>
-                <th className="px-4 py-2">Product Name</th>
-                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Replace Serial</th>
+                <th className="px-4 py-2">S Code</th>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Replace Code</th>
+                <th className="px-4 py-2">Replace Name</th>
                 <th className="px-4 py-2">Received</th>
               </tr>
             </thead>
             <tbody>
               {jobRecords.map(rec => (
-                <tr key={rec.reportid} className="border-t hover:bg-gray-50">
-                  <td className="px-4 py-2">{rec.reportid}</td>
-                  <td className="px-4 py-2">{rec.round}</td>
-                  <td className="px-4 py-2">{rec.serial_no}</td>
+                <tr key={rec.rowuid} className="border-t hover:bg-gray-50">
+                  <td className="px-4 py-2">{rec.job_no}</td>
+                  <td className="px-4 py-2">{rec.count_round}</td>
+                  <td className="px-4 py-2">{rec.serial_number}</td>
+                  <td className="px-4 py-2">{rec.replace_serial}</td>
+                  <td className="px-4 py-2">{rec.product_code}</td>
                   <td className="px-4 py-2">{rec.product_name}</td>
-                  <td className="px-4 py-2">{rec.status}</td>
-                  <td className="px-4 py-2">{rec.received_date}</td>
+                  <td className="px-4 py-2">{rec.replace_code}</td>
+                  <td className="px-4 py-2">{rec.replace_product}</td>
+                  <td className="px-4 py-2">{rec.received_date.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

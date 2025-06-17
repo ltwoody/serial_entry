@@ -59,7 +59,7 @@ export default function CheckingPage() {
         onClick={handleCheck}
         disabled={loading}
         className={`w-full py-2 rounded text-white ${
-          loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+          loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-500 hover:bg-gray-700'
         }`}
       >
         {loading ? 'Checking...' : 'Check'}

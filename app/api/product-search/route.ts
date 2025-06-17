@@ -15,11 +15,11 @@ export async function GET(req: Request) {
       // Use ILIKE for case-insensitive pattern matching in Postgres
       const result = await client.query(
         `
-          SELECT product_code, brand, product_name
+          SELECT product_code, brand_name, product_name
           FROM product_master
           WHERE product_code ILIKE $1
              OR product_name ILIKE $1
-             OR brand ILIKE $1
+             OR brand_name ILIKE $1
           ORDER BY product_code
           LIMIT 50
         `,
