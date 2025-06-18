@@ -5,7 +5,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
 
   // Get individual filter params, all lowercase keys (match your frontend)
-  
+
   const serial_no = url.searchParams.get('serial_number');
   const received_date = url.searchParams.get('received_date');
   const supplier = url.searchParams.get('supplier');
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   try {
     let baseQuery = 'SELECT * FROM serial_job';
     const conditions: string[] = [];
-    const values: any[] = [];
+    const values: (string | number)[] = [];
 
     if (received_date) {
       conditions.push(`LOWER("received_date") = $${values.length + 1}`);
@@ -60,18 +60,18 @@ export async function GET(req: Request) {
       values.push(replace_serial.toLowerCase());
     }
     if (round) {
-      conditions.push(`LOWER("count_round") = $${values.length + 1}`);
-      values.push(round.toLowerCase());
+      conditions.push(`"count_round" = $${values.length + 1}`);
+      values.push(Number(round));
     }
-    
+
     if (serial_no) {
-  conditions.push(`"serial_number" ILIKE '%' || $${values.length + 1} || '%'`);
-  values.push(serial_no);
-}
-if (rowid) {
-  conditions.push(`"rowuid" ILIKE '%' || $${values.length + 1} || '%'`);
-  values.push(rowid);
-}
+      conditions.push(`"serial_number" ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(serial_no);
+    }
+    if (rowid) {
+      conditions.push(`"rowuid" ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(rowid);
+    }
 
 
 

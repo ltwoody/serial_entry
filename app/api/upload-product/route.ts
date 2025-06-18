@@ -3,7 +3,14 @@ import { parse } from 'csv-parse/sync';
 import * as xlsx from 'xlsx';
 import { pool } from '@/lib/db';
 
-const EXPECTED_HEADERS = ['oid','product_code', 'brand_name', 'product_name'];
+const EXPECTED_HEADERS = ['oid', 'product_code', 'brand_name', 'product_name'];
+
+interface ProductRow {
+  oid: number;
+  product_code: string;
+  brand_name: string;
+  product_name: string;
+}
 
 function validateHeaders(actualHeaders: string[]) {
   // Check that both arrays have same length and same values (case sensitive)
@@ -24,7 +31,7 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    let rows: any[] = [];
+    let rows: ProductRow[] = [];
     let actualHeaders: string[] = [];
 
     if (file.name.endsWith('.csv')) {
@@ -73,7 +80,7 @@ export async function POST(req: Request) {
         await client.query(
           `INSERT INTO product_master (oid,product_code, brand_name, product_name)
            VALUES ($1, $2, $3 , $4)`,
-          [row.oid ,row.product_code, row.brand_name, row.product_name]
+          [row.oid, row.product_code, row.brand_name, row.product_name]
         );
       }
 
@@ -86,8 +93,11 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ message: 'Upload and import successful', count: rows.length });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
+    if (err instanceof Error) {
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    }
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

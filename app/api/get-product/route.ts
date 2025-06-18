@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         [serial_number]
       );
       console.log('Duplicate Check:', dupCheck.rowCount);
-      if (dupCheck.rowCount > 0) {
+      if ((dupCheck.rowCount as number) > 0) {
         resultData.message = 'Serial number is already used';
         return NextResponse.json(resultData, { status: 400 });
       }
@@ -48,12 +48,12 @@ export async function POST(req: NextRequest) {
       );
       console.log('Replace Result:', replaceResult.rows);
       if (replaceResult.rows.length > 0) {
-  const maxRound = parseInt(replaceResult.rows[0].max_round ?? '0', 10);
-  resultData.count_round = maxRound + 1;
-  resultData.u_id = replaceResult.rows[0].u_id;
-} else {
-  resultData.count_round = 1; // Default round
-}
+        const maxRound = parseInt(replaceResult.rows[0].max_round ?? '0', 10);
+        resultData.count_round = maxRound + 1;
+        resultData.u_id = replaceResult.rows[0].u_id;
+      } else {
+        resultData.count_round = 1; // Default round
+      }
     }
 
     return Object.keys(resultData).length > 0

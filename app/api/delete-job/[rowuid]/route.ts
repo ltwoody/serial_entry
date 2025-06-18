@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
-export async function DELETE(req: NextRequest, { params }: { params: { rowuid: string } }) {
-  const { rowuid } = params;
+export async function DELETE(req: NextRequest) {
+  const client = await pool.connect();
 
   try {
-    const client = await pool.connect();
+    const url = new URL(req.url);
+    const rowuid = url.pathname.split('/').pop(); // Get the last segment of the URL
+
+    if (!rowuid) {
+      return NextResponse.json({ error: 'rowuid is required' }, { status: 400 });
+    }
+
     await client.query('DELETE FROM serial_job WHERE rowuid = $1', [rowuid]);
-    client.release();
+
     return NextResponse.json({ message: 'Deleted successfully' });
   } catch (err) {
-    console.error('Delete error:', err);
-    return NextResponse.json({ error: 'Failed to delete record' }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } finally {
+    client.release();
   }
 }
