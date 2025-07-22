@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, FileText } from 'lucide-react'; // Import FileText icon
 
 const RECORDS_PER_PAGE = 10;
 
@@ -39,6 +39,7 @@ interface JobFilters {
 export default function JobReport() {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true); // Add loading state for role
 
   useEffect(() => {
     async function fetchUser() {
@@ -52,6 +53,8 @@ export default function JobReport() {
         }
       } catch {
         setRole(null);
+      } finally {
+        setLoading(false); // Set loading to false after fetch
       }
     }
     fetchUser();
@@ -123,12 +126,42 @@ export default function JobReport() {
 
       if (!res.ok) throw new Error(await res.text());
 
-      fetchData();
+      fetchData(); // Re-fetch data after successful deletion
     } catch (err) {
       console.error('Delete failed:', err);
       alert('Failed to delete record');
     }
   };
+
+  const handleExport = async () => {
+  try {
+    const query = buildQuery(); // This will include your current filters
+    const response = await fetch(`/api/export-jobs${query ? `?${query}` : ''}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to export data: ${errorText}`);
+    }
+
+    // Get the blob (file content) from the response
+    const blob = await response.blob();
+
+    // Create a URL for the blob and trigger a download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'job_report.xlsx'; // Suggested filename
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url); // Clean up the URL object
+
+    alert('Job report exported successfully!');
+  } catch (error) {
+    console.error('Export failed:', error);
+    alert(`Failed to export data to Excel: ${error instanceof Error ? error.message : String(error)}`);
+  }
+};
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -148,7 +181,10 @@ export default function JobReport() {
       rec.job_no?.toLowerCase().includes(term) ||
       rec.product_name?.toLowerCase().includes(term) ||
       rec.replace_serial?.toLowerCase().includes(term) ||
-      rec.rowuid?.toLowerCase().includes(term)
+      rec.rowuid?.toLowerCase().includes(term) ||
+      (rec.received_date ? rec.received_date.toLocaleDateString('en-CA').toLowerCase().includes(term) : false) ||
+      (rec.date_receipt ? rec.date_receipt.toLocaleDateString('en-CA').toLowerCase().includes(term) : false) ||
+      (rec.count_round ? rec.count_round.toString().toLowerCase().includes(term) : false)
     );
   });
 
@@ -160,6 +196,14 @@ export default function JobReport() {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Loading user role...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-6 bg-gray-100 min-h-screen">
@@ -210,6 +254,18 @@ export default function JobReport() {
           >
             Clear
           </button>
+
+          {/* Export Button - Visible only to admin */}
+          {role === 'admin' && (
+            <button
+              onClick={handleExport}
+              className="bg-green-500 text-white px-5 py-2 rounded-md text-sm hover:bg-green-700 flex items-center gap-2"
+              title="Export data to Excel"
+            >
+              <FileText size={18} />
+              Export
+            </button>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -267,7 +323,7 @@ export default function JobReport() {
                         <td className="px-4 py-3">{rec.replace_serial}</td>
                         <td className="px-4 py-3">{rec.count_round}</td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-3 text-gray-700">
+                          <div className="flex items-center justify-center gap-3 text-gray-700"> {/* Added justify-center */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -308,7 +364,7 @@ export default function JobReport() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={10} className="text-center py-8 text-gray-400">
+                      <td colSpan={11} className="text-center py-8 text-gray-400"> {/* Updated colspan */}
                         No records found.
                       </td>
                     </tr>
