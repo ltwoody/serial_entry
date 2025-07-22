@@ -7,6 +7,8 @@ import { notFound } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import DataDetailClient from '@/app/components/DataDetailClient';
 
+// update
+
 // This is the standard pattern to prevent multiple Prisma Client instances in development.
 declare global {
   // The 'var' keyword is necessary for global declarations.
