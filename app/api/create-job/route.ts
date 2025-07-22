@@ -25,31 +25,35 @@ export async function POST(req: NextRequest) {
     const username = cookieUser ? decodeURIComponent(cookieUser) : 'unknown';
 
     // Helper function to parse and validate date strings
+    // This function returns a Date object or null if the input is invalid or empty.
     const parseDate = (dateString: string | null | undefined): Date | null => {
       if (!dateString) {
         return null; // If empty or null, return null for optional fields
       }
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        // If the date is invalid, return null or throw an error based on your preference
-        // For this example, we'll return null and let the calling code handle it
+        // If the date is invalid, return null.
+        // You might consider throwing an error here if these fields are strictly mandatory
+        // and an invalid format should halt the process.
         return null;
       }
       return date;
     };
 
     // Parse and validate date fields
+    // These will now correctly be of type Date | null
     const parsedDateReceipt = parseDate(date_receipt);
     const parsedReceivedDate = parseDate(received_date);
 
     // If date_receipt is mandatory and invalid, return an error
-    // Adjust this logic if date_receipt is optional in your Prisma schema
+    // This check is still valid if you want to enforce valid date strings when provided,
+    // even if the field is nullable in the DB.
     if (date_receipt && parsedDateReceipt === null) {
       return NextResponse.json({ message: 'Invalid format for date_receipt. Expected ISO-8601 DateTime string.' }, { status: 400 });
     }
 
     // If received_date is mandatory and invalid, return an error
-    // Adjust this logic if received_date is optional in your Prisma schema
+    // Similar to date_receipt, this ensures format validity when the string is present.
     if (received_date && parsedReceivedDate === null) {
       return NextResponse.json({ message: 'Invalid format for received_date. Expected ISO-8601 DateTime string.' }, { status: 400 });
     }
@@ -89,7 +93,6 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Generate a unique rowuid
-    // add
     let rowuid: string;
     while (true) {
       const candidate = uuidv4();
@@ -106,9 +109,9 @@ export async function POST(req: NextRequest) {
         u_id, // This is now guaranteed to be a string
         rowuid,
         serial_number,
-        date_receipt: parsedDateReceipt, // Use the parsed Date object or null
+        date_receipt: parsedDateReceipt, // Now correctly assigned as Date | null
         supplier,
-        received_date: parsedReceivedDate, // Use the parsed Date object or null
+        received_date: parsedReceivedDate, // Now correctly assigned as Date | null
         product_code,
         brand_name,
         job_no,
