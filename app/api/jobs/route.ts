@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filters: any = {};
 
   // String filters with optional case-insensitive comparison

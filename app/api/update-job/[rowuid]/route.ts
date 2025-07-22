@@ -54,6 +54,7 @@ export async function PUT(
       { message: 'Job updated successfully', data: updatedJob },
       { status: 200 }
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Update error:', error);
 

@@ -20,6 +20,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Deleted successfully', deleted }, { status: 200 });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Delete error:', error);
 

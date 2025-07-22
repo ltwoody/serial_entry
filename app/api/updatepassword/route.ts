@@ -65,6 +65,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ message: 'Password updated successfully!' }, { status: 200 });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Password update error:', error);
     // Handle Prisma-specific errors or general database errors

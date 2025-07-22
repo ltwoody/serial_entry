@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     } else {
       return NextResponse.json({ product_name: '' }, { status: 200 });
     }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error fetching product_name (POST):', error); // Added context to error message
 
@@ -89,6 +90,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ products }, { status: 200 });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error fetching product search results (GET):', error); // Added context to error message
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

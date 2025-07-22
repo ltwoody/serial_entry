@@ -21,6 +21,7 @@ export async function DELETE(req: NextRequest) {
     // If deletion is successful, Prisma returns the deleted record
     return NextResponse.json({ message: 'Job deleted successfully', deleted }, { status: 200 });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error deleting job:', error);
 
