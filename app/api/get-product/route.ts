@@ -1,3 +1,5 @@
+// app/api/get-product/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -21,8 +23,10 @@ export async function POST(req: NextRequest) {
       });
 
       if (product) {
-        resultData.brand_name = product.brand_name;
-        resultData.product_name = product.product_name;
+        // Use the nullish coalescing operator (??) to convert null to undefined.
+        // This ensures the type matches the `ResultData` interface.
+        resultData.brand_name = product.brand_name ?? undefined;
+        resultData.product_name = product.product_name ?? undefined;
       }
     }
 
@@ -43,7 +47,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (replace.length > 0) {
-        resultData.count_round = replace[0].count_round + 1;
+        resultData.count_round = (replace[0].count_round ?? 0) + 1;
         resultData.u_id = replace[0].u_id;
       } else {
         resultData.count_round = 1;

@@ -1,78 +1,83 @@
+// app/api/create-job/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma'; // Make sure this path is correct
 import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: NextRequest) {
-  const {
-    
-    serial_number,
-    date_receipt,
-    supplier,
-    received_date,
-    product_code,
-    brand_name,
-    job_no,
-    product_name,
-    count_round,
-    condition,
-    remark,
-  } = await req.json();
-
-  // 🔐 Get username from cookie
-  const cookieUser = req.cookies.get('user')?.value;
-  const username = cookieUser ? decodeURIComponent(cookieUser) : 'unknown';
-
   try {
-    // 1. Check for duplicate serial_number
-    const serialExists = await prisma.serialJob.findUnique({
-      where: { serial_number },
-    });
+    const {
+      serial_number,
+      date_receipt,
+      supplier,
+      received_date,
+      product_code,
+      brand_name,
+      job_no,
+      product_name,
+      count_round,
+      condition,
+      remark,
+    } = await req.json();
 
-    if (serialExists) {
-      return NextResponse.json({ message: 'Serial number already in use' }, { status: 400 });
+    // 🔐 Get username from cookie
+    const cookieUser = req.cookies.get('user')?.value;
+    const username = cookieUser ? decodeURIComponent(cookieUser) : 'unknown';
+
+    // 1. Check for duplicate serial_number
+    if (serial_number) {
+      const serialExists = await prisma.serialJob.findUnique({
+        where: { serial_number },
+      });
+
+      if (serialExists) {
+        return NextResponse.json({ message: 'Serial number already in use' }, { status: 400 });
+      }
     }
 
-    // 2. Check if serial number exists as replace_serial and reuse its u_id
-    const replaceRecord = await prisma.serialJob.findFirst({
+    // 2. Determine the u_id
+    let u_id: string; // Declare u_id, ensuring it will be a string.
+
+    const replaceRecord = serial_number ? await prisma.serialJob.findFirst({
       where: { replace_serial: serial_number },
       select: { u_id: true },
-    });
+    }) : null;
 
-    let u_id = replaceRecord?.u_id;
-    if (!u_id) {
-      // Generate a new unique u_id
-      let isUnique = false;
-      while (!isUnique) {
+    if (replaceRecord) {
+      // If the serial number was a replacement, reuse the existing u_id
+      u_id = replaceRecord.u_id;
+    } else {
+      // Otherwise, generate a new unique u_id
+      while (true) {
         const tempId = uuidv4();
         const check = await prisma.serialJob.findFirst({ where: { u_id: tempId } });
         if (!check) {
           u_id = tempId;
-          isUnique = true;
+          break; // Exit loop once a unique ID is found
         }
       }
     }
 
-    // 3. Generate unique rowuid
-    let rowuid = '';
-    let isRowUidUnique = false;
-    while (!isRowUidUnique) {
+    // 3. Generate a unique rowuid
+    let rowuid: string;
+    while (true) {
       const candidate = uuidv4();
       const check = await prisma.serialJob.findUnique({ where: { rowuid: candidate } });
       if (!check) {
         rowuid = candidate;
-        isRowUidUnique = true;
+        break; // Exit loop once a unique ID is found
       }
     }
 
     // 4. Insert the new record
     await prisma.serialJob.create({
       data: {
-        u_id,
+        u_id, // This is now guaranteed to be a string
         rowuid,
         serial_number,
-        date_receipt: date_receipt ? new Date(date_receipt) : null,
+        date_receipt,
         supplier,
-        received_date: received_date ? new Date(received_date) : null,
+        received_date,
         product_code,
         brand_name,
         job_no,
@@ -89,6 +94,10 @@ export async function POST(req: NextRequest) {
 
   } catch (err) {
     console.error('Error inserting serial job:', err);
+    // Handle potential JSON parsing errors
+    if (err instanceof SyntaxError) {
+      return NextResponse.json({ message: 'Invalid JSON in request body' }, { status: 400 });
+    }
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

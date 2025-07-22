@@ -22,10 +22,16 @@ export default function LoginPage() {
       if (res.ok) {
         router.push('/');
       } else {
-        setError(data.message);
+        setError(data.message || 'An unknown login error occurred.');
       }
     } catch (err) {
-      setError(`An unexpected error occurred. Please try again. Error: ${err.message || err}`);
+      // Type guard to check if the caught error is an Error object
+      if (err instanceof Error) {
+        setError(`An unexpected error occurred: ${err.message}`);
+      } else {
+        // Handle cases where the thrown value is not an Error object
+        setError('An unexpected and unknown error occurred.');
+      }
       console.error(err); // Use console.error for errors
     }
   };

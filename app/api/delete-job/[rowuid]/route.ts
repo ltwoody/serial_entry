@@ -1,38 +1,55 @@
-// File: /app/api/delete-job/[rowuid]/route.ts
+// app/api/update-job/[rowuid]/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'; // Adjust this path if needed
+import { prisma } from '@/lib/prisma'; // Make sure this path is correct
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { rowuid: string } } // Reverted: The 'params' object is now nested again, as typically expected by Next.js
-) {
-  const { rowuid } = params; // Access rowuid from the nested 'params' object
-
-  // Validate if rowuid is provided and not empty
-  if (!rowuid || rowuid.trim() === '') {
-    return NextResponse.json({ error: 'rowuid is required' }, { status: 400 });
-  }
-
+export async function PUT(req: NextRequest) {
   try {
-    // Attempt to delete the record using Prisma's delete method
-    const deleted = await prisma.serialJob.delete({
-      where: { rowuid }, // Specify the record to delete by its rowuid
-    });
+    // Get the 'rowuid' from the URL itself, avoiding the problematic second argument
+    const pathname = new URL(req.url).pathname;
+    const rowuid = pathname.split('/').pop();
 
-    // If deletion is successful, return a success message and the deleted record
-    return NextResponse.json({ message: 'Deleted successfully', deleted }, { status: 200 });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    // Log the error for debugging purposes
-    console.error('Delete error:', error);
-
-    // Check if the error is a Prisma P2025 code, which indicates a record not found error
-    if (error.code === 'P2025') {
-      return NextResponse.json({ message: 'No job found with that rowuid' }, { status: 404 });
+    if (!rowuid) {
+      return NextResponse.json(
+        { error: 'Invalid URL: Could not find the rowuid.' },
+        { status: 400 }
+      );
     }
 
-    // For any other unexpected errors, return a generic internal server error
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    // Get the update data from the request body
+    const body = await req.json();
+
+    // Update the record in the database
+    const updatedJob = await prisma.serialJob.update({
+      where: { rowuid },
+      data: body,
+    });
+
+    return NextResponse.json(updatedJob);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error('Update error:', error);
+
+    // Handle cases where the record to update doesn't exist
+    if (error.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Record to update not found.' },
+        { status: 404 }
+      );
+    }
+    
+    // Handle JSON parsing errors from an empty or invalid body
+    if (error instanceof SyntaxError) {
+        return NextResponse.json(
+            { error: 'Invalid JSON in request body.'},
+            { status: 400 }
+        );
+    }
+
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
