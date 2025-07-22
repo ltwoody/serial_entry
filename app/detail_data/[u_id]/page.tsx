@@ -89,7 +89,7 @@ export default async function DataDetail({ params }: DataDetailProps) {
     // Format all related job records with the same logic.
     const formattedJobRecords = jobRecords.map(r => ({
       ...r,
-      received_date: new Date(r.received_date).toISOString().split('T')[0],
+      received_date: formatDate(r.received_date),
       update_time: new Date(r.update_time).toISOString().split('T')[0],
       date_receipt: formatDate(r.date_receipt),
       replace_serial: r.replace_serial ?? '',
