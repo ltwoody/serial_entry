@@ -24,6 +24,36 @@ export async function POST(req: NextRequest) {
     const cookieUser = req.cookies.get('user')?.value;
     const username = cookieUser ? decodeURIComponent(cookieUser) : 'unknown';
 
+    // Helper function to parse and validate date strings
+    const parseDate = (dateString: string | null | undefined): Date | null => {
+      if (!dateString) {
+        return null; // If empty or null, return null for optional fields
+      }
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // If the date is invalid, return null or throw an error based on your preference
+        // For this example, we'll return null and let the calling code handle it
+        return null;
+      }
+      return date;
+    };
+
+    // Parse and validate date fields
+    const parsedDateReceipt = parseDate(date_receipt);
+    const parsedReceivedDate = parseDate(received_date);
+
+    // If date_receipt is mandatory and invalid, return an error
+    // Adjust this logic if date_receipt is optional in your Prisma schema
+    if (date_receipt && parsedDateReceipt === null) {
+      return NextResponse.json({ message: 'Invalid format for date_receipt. Expected ISO-8601 DateTime string.' }, { status: 400 });
+    }
+
+    // If received_date is mandatory and invalid, return an error
+    // Adjust this logic if received_date is optional in your Prisma schema
+    if (received_date && parsedReceivedDate === null) {
+      return NextResponse.json({ message: 'Invalid format for received_date. Expected ISO-8601 DateTime string.' }, { status: 400 });
+    }
+
     // 1. Check for duplicate serial_number
     if (serial_number) {
       const serialExists = await prisma.serialJob.findUnique({
@@ -75,9 +105,9 @@ export async function POST(req: NextRequest) {
         u_id, // This is now guaranteed to be a string
         rowuid,
         serial_number,
-        date_receipt,
+        date_receipt: parsedDateReceipt, // Use the parsed Date object or null
         supplier,
-        received_date,
+        received_date: parsedReceivedDate, // Use the parsed Date object or null
         product_code,
         brand_name,
         job_no,
