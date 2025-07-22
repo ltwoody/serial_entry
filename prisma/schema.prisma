@@ -34,7 +34,7 @@ model SerialJob {
   u_id          String
   serial_number String   @unique
   replace_serial String?
-  received_date DateTime @db.Date
+  received_date DateTime? @db.Date
   supplier      String?
   date_receipt  DateTime? @db.Date 
   brand_name    String?
