@@ -57,7 +57,7 @@ export default async function DataDetail({ params }: DataDetailProps) {
     const formattedRecord = {
       ...record,
       // Non-nullable dates can be formatted directly.
-      received_date: new Date(record.received_date).toISOString().split('T')[0],
+      received_date: formatDate(record.received_date),
       update_time: new Date(record.update_time).toISOString().split('T')[0],
       // Nullable date uses the helper function.
       date_receipt: formatDate(record.date_receipt),
