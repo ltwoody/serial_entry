@@ -1,13 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
   const [identifier, setIdentifier] = useState(''); // Could be username or email
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
       <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-8">
         <h1 className="text-3xl font-extrabold text-blue-700 mb-8 text-center">Forgot Password</h1>
         <p className="text-gray-600 mb-6 text-center">
-          Enter your username or email address and we'll send you a link to reset your password.
+          Enter your username or email address and  send you a link to reset your password.
         </p>
 
         <form onSubmit={handleSubmit}>

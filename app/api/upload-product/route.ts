@@ -89,7 +89,7 @@ export async function POST(req: Request) {
           skipDuplicates: true, // Optional: if you want to skip rows that might cause unique constraint errors
         });
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If any operation within the transaction fails, it will be rolled back automatically
       console.error('Prisma transaction error during upload:', error);
       // Re-throw to be caught by the outer catch block

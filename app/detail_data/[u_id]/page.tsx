@@ -9,6 +9,7 @@ import DataDetailClient from '@/app/components/DataDetailClient';
 // during development, which can lead to connection issues.
 // This pattern is common in Next.js applications.
 declare global {
+  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
