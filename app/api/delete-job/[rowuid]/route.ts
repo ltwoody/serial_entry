@@ -5,9 +5,9 @@ import { prisma } from '@/lib/prisma'; // Adjust this path if needed
 
 export async function DELETE(
   req: NextRequest,
-  params: { rowuid: string } // Changed: The 'params' object is now the second argument directly
+  { params }: { params: { rowuid: string } } // Reverted: The 'params' object is now nested again, as typically expected by Next.js
 ) {
-  const { rowuid } = params; // Access rowuid directly from the 'params' argument
+  const { rowuid } = params; // Access rowuid from the nested 'params' object
 
   // Validate if rowuid is provided and not empty
   if (!rowuid || rowuid.trim() === '') {
