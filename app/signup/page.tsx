@@ -9,6 +9,7 @@ export default function SignupPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -22,7 +23,7 @@ export default function SignupPage() {
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password ,firstname,lastname}),
+      body: JSON.stringify({ username, password ,firstname,lastname,role}),
     });
 
     const data = await res.json();
@@ -94,6 +95,21 @@ export default function SignupPage() {
             />
           </div>
         </div>
+
+         <div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+  <select
+    id="role" // Add an ID for accessibility, linked by htmlFor in the label
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    value={role} // Assuming you have a 'role' state variable to control the selected value
+    onChange={(e) => setRole(e.target.value)} // Update the 'role' state when selection changes
+  >
+    {/* Optional: Add a default disabled option if you want a "Choose Role" placeholder */}
+    <option value="" disabled>Choose Role</option>
+    <option value="user">User</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
 
         <button
           className="mt-6 w-full bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-700 transition"

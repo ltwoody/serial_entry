@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
-import { QueryResult } from 'pg'; // Don't forget this import
 
 export async function POST(req: NextRequest) {
   const {
+    
     serial_number,
     date_receipt,
     supplier,
@@ -18,111 +18,77 @@ export async function POST(req: NextRequest) {
     remark,
   } = await req.json();
 
-  // 🔒 Get username securely from cookies
+  // 🔐 Get username from cookie
   const cookieUser = req.cookies.get('user')?.value;
   const username = cookieUser ? decodeURIComponent(cookieUser) : 'unknown';
 
-  const client = await pool.connect();
-
   try {
-    // 1. Check for duplicate serial_number in main column
-    const dupSerial: QueryResult = await client.query(
-      'SELECT 1 FROM serial_job WHERE serial_number = $1',
-      [serial_number]
-    );
+    // 1. Check for duplicate serial_number
+    const serialExists = await prisma.serialJob.findUnique({
+      where: { serial_number },
+    });
 
-    if ((dupSerial.rowCount as number) > 0) {
+    if (serialExists) {
       return NextResponse.json({ message: 'Serial number already in use' }, { status: 400 });
     }
 
-    // 2. Check if serial_number is in replace_serial field
-    const replaceCheck: QueryResult = await client.query(
-      'SELECT u_id FROM serial_job WHERE replace_serial = $1 LIMIT 1',
-      [serial_number]
-    );
+    // 2. Check if serial number exists as replace_serial and reuse its u_id
+    const replaceRecord = await prisma.serialJob.findFirst({
+      where: { replace_serial: serial_number },
+      select: { u_id: true },
+    });
 
-    let u_id: string;
-    if ((replaceCheck.rowCount as number) > 0) {
-      // Reuse u_id from matched replace_serial
-      u_id = replaceCheck.rows[0].u_id;
-    } else {
-      // Generate new unique u_id
-      // ✅ FIX: Initialize newUid directly
-      let newUid: string = uuidv4(); // Initialize with the first UUID
+    let u_id = replaceRecord?.u_id;
+    if (!u_id) {
+      // Generate a new unique u_id
       let isUnique = false;
-
-      // If it's already unique (very likely), the loop won't run on the first check
       while (!isUnique) {
-        const uidCheck: QueryResult = await client.query(
-          'SELECT 1 FROM serial_job WHERE u_id = $1',
-          [newUid]
-        );
-        if ((uidCheck.rowCount as number) === 0) {
+        const tempId = uuidv4();
+        const check = await prisma.serialJob.findFirst({ where: { u_id: tempId } });
+        if (!check) {
+          u_id = tempId;
           isUnique = true;
-        } else {
-          // If not unique, generate a new one for the next iteration
-          newUid = uuidv4();
         }
       }
-      u_id = newUid; // newUid is guaranteed to be assigned
     }
 
     // 3. Generate unique rowuid
-    let rowuid: string = uuidv4(); // Initialize with the first UUID
+    let rowuid = '';
     let isRowUidUnique = false;
-
     while (!isRowUidUnique) {
-      const rowUidCheck: QueryResult = await client.query(
-        'SELECT 1 FROM serial_job WHERE rowuid = $1',
-        [rowuid]
-      );
-      if ((rowUidCheck.rowCount as number) === 0) {
+      const candidate = uuidv4();
+      const check = await prisma.serialJob.findUnique({ where: { rowuid: candidate } });
+      if (!check) {
+        rowuid = candidate;
         isRowUidUnique = true;
-      } else {
-        rowuid = uuidv4();
       }
     }
 
-    // 4. Insert data
-    const insertQuery = `
-      INSERT INTO serial_job (
-        u_id, rowuid, serial_number, date_receipt, supplier,
-        received_date, product_code, brand_name,
-        job_no, product_name, count_round,
-        condition, remark, create_by, create_time
-      )
-      VALUES (
-        $1, $2, $3, $4, $5,
-        $6, $7, $8,
-        $9, $10, $11,
-        $12, $13, $14, NOW()
-      )
-    `;
-
-    const values = [
-      u_id,
-      rowuid,
-      serial_number,
-      date_receipt,
-      supplier,
-      received_date,
-      product_code,
-      brand_name,
-      job_no,
-      product_name,
-      count_round,
-      condition,
-      remark,
-      username || 'unknown',
-    ];
-
-    await client.query(insertQuery, values);
+    // 4. Insert the new record
+    await prisma.serialJob.create({
+      data: {
+        u_id,
+        rowuid,
+        serial_number,
+        date_receipt: date_receipt ? new Date(date_receipt) : null,
+        supplier,
+        received_date: received_date ? new Date(received_date) : null,
+        product_code,
+        brand_name,
+        job_no,
+        product_name,
+        count_round,
+        condition,
+        remark,
+        create_by: username,
+        create_time: new Date(),
+      },
+    });
 
     return NextResponse.json({ message: 'Created', u_id, rowuid }, { status: 201 });
+
   } catch (err) {
     console.error('Error inserting serial job:', err);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  } finally {
-    client.release();
   }
 }

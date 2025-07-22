@@ -1,24 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+// File: /app/api/delete-job/[rowuid]/route.ts
 
-export async function DELETE(req: NextRequest) {
-  const client = await pool.connect();
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma'; // Adjust this path if needed
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { rowuid: string } }
+) {
+  const { rowuid } = params;
+
+  if (!rowuid || rowuid.trim() === '') {
+    return NextResponse.json({ error: 'rowuid is required' }, { status: 400 });
+  }
 
   try {
-    const url = new URL(req.url);
-    const rowuid = url.pathname.split('/').pop(); // Get the last segment of the URL
+    // Try deleting the record using Prisma
+    const deleted = await prisma.serialJob.delete({
+      where: { rowuid },
+    });
 
-    if (!rowuid) {
-      return NextResponse.json({ error: 'rowuid is required' }, { status: 400 });
+    return NextResponse.json({ message: 'Deleted successfully', deleted }, { status: 200 });
+  } catch (error: any) {
+    console.error('Delete error:', error);
+
+    if (error.code === 'P2025') {
+      return NextResponse.json({ message: 'No job found with that rowuid' }, { status: 404 });
     }
 
-    await client.query('DELETE FROM serial_job WHERE rowuid = $1', [rowuid]);
-
-    return NextResponse.json({ message: 'Deleted successfully' });
-  } catch (err) {
-    console.error(err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  } finally {
-    client.release();
   }
 }

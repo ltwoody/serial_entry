@@ -1,87 +1,68 @@
-import { NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const url = new URL(req.url);
 
-  // Get individual filter params, all lowercase keys (match your frontend)
+  const filters: any = {};
 
-  const serial_no = url.searchParams.get('serial_number');
+  // String filters with optional case-insensitive comparison
+  const getStringFilter = (param: string) => {
+    const value = url.searchParams.get(param);
+    return value ? { contains: value, mode: 'insensitive' as const } : undefined;
+  };
+
+  // Add filters conditionally
   const received_date = url.searchParams.get('received_date');
-  const supplier = url.searchParams.get('supplier');
+  if (received_date) {
+    filters.received_date = new Date(received_date);
+  }
+
   const date_receipt = url.searchParams.get('date_receipt');
-  const product_code = url.searchParams.get('product_code');
-  const brand = url.searchParams.get('brand_name');
-  const job_no = url.searchParams.get('job_no');
-  const product_name = url.searchParams.get('product_name');
-  const replace_serial = url.searchParams.get('replace_serial');
+  if (date_receipt) {
+    filters.date_receipt = new Date(date_receipt);
+  }
+
   const round = url.searchParams.get('count_round');
-  const rowid = url.searchParams.get('rowuid');
+  if (round) {
+    filters.count_round = Number(round);
+  }
 
+  const serial_number = getStringFilter('serial_number');
+  if (serial_number) filters.serial_number = serial_number;
 
-  const client = await pool.connect();
+  const supplier = getStringFilter('supplier');
+  if (supplier) filters.supplier = supplier;
+
+  const product_code = getStringFilter('product_code');
+  if (product_code) filters.product_code = product_code;
+
+  const brand_name = getStringFilter('brand_name');
+  if (brand_name) filters.brand_name = brand_name;
+
+  const job_no = getStringFilter('job_no');
+  if (job_no) filters.job_no = job_no;
+
+  const product_name = getStringFilter('product_name');
+  if (product_name) filters.product_name = product_name;
+
+  const replace_serial = getStringFilter('replace_serial');
+  if (replace_serial) filters.replace_serial = replace_serial;
+
+  const rowuid = getStringFilter('rowuid');
+  if (rowuid) filters.rowuid = rowuid;
+
   try {
-    let baseQuery = 'SELECT * FROM serial_job';
-    const conditions: string[] = [];
-    const values: (string | number)[] = [];
+    const results = await prisma.serialJob.findMany({
+      where: filters,
+      orderBy: {
+        create_time: 'desc', // optional: sort by newest first
+      },
+    });
 
-    if (received_date) {
-      conditions.push(`LOWER("received_date") = $${values.length + 1}`);
-      values.push(received_date.toLowerCase());
-    }
-
-    if (supplier) {
-      conditions.push(`LOWER("supplier") = $${values.length + 1}`);
-      values.push(supplier.toLowerCase());
-    }
-
-    if (date_receipt) {
-      conditions.push(`LOWER("date_receipt") = $${values.length + 1}`);
-      values.push(date_receipt.toLowerCase());
-    }
-    if (product_code) {
-      conditions.push(`LOWER("product_code") = $${values.length + 1}`);
-      values.push(product_code.toLowerCase());
-    }
-    if (brand) {
-      conditions.push(`LOWER("brand_name") = $${values.length + 1}`);
-      values.push(brand.toLowerCase());
-    }
-    if (job_no) {
-      conditions.push(`LOWER("job_no") = $${values.length + 1}`);
-      values.push(job_no.toLowerCase());
-    }
-    if (product_name) {
-      conditions.push(`LOWER("product_name") = $${values.length + 1}`);
-      values.push(product_name.toLowerCase());
-    }
-    if (replace_serial) {
-      conditions.push(`LOWER("replace_serial") = $${values.length + 1}`);
-      values.push(replace_serial.toLowerCase());
-    }
-    if (round) {
-      conditions.push(`"count_round" = $${values.length + 1}`);
-      values.push(Number(round));
-    }
-
-    if (serial_no) {
-      conditions.push(`"serial_number" ILIKE '%' || $${values.length + 1} || '%'`);
-      values.push(serial_no);
-    }
-    if (rowid) {
-      conditions.push(`"rowuid" ILIKE '%' || $${values.length + 1} || '%'`);
-      values.push(rowid);
-    }
-
-
-
-    if (conditions.length > 0) {
-      baseQuery += ' WHERE ' + conditions.join(' AND ');
-    }
-
-    const result = await client.query(baseQuery, values);
-    return NextResponse.json(result.rows);
-  } finally {
-    client.release();
+    return NextResponse.json(results);
+  } catch (error) {
+    console.error('GET serialJob error:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

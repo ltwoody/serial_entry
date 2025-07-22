@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link'; // Import Link component
 
 export default function LoginPage() {
   const router = useRouter();
@@ -9,16 +10,30 @@ export default function LoginPage() {
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      router.push('/');
-    } else {
-      setError(data.message);
+    // Clear any previous error messages when trying to log in again
+    setError('');
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        router.push('/');
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError(`An unexpected error occurred. Please try again. Error: ${err.message || err}`);
+      console.error(err); // Use console.error for errors
+    }
+  };
+
+  // New function to handle key presses
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleLogin();
     }
   };
 
@@ -35,6 +50,7 @@ export default function LoginPage() {
           placeholder="Your username"
           value={username}
           onChange={e => setUsername(e.target.value)}
+          onKeyDown={handleKeyPress}
           className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
         />
 
@@ -46,6 +62,7 @@ export default function LoginPage() {
           placeholder="••••••••"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          onKeyDown={handleKeyPress}
           className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
         />
 
@@ -62,7 +79,12 @@ export default function LoginPage() {
           </p>
         )}
 
-        
+        {/* Forgot Password Link */}
+        <div className="mt-4 text-center text-sm">
+          <Link href="/forgot-password" className="text-blue-600 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
       </div>
     </div>
   );

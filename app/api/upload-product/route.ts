@@ -1,7 +1,9 @@
+// File: /app/api/upload-product/route.ts
+
 import { NextResponse } from 'next/server';
 import { parse } from 'csv-parse/sync';
 import * as xlsx from 'xlsx';
-import { pool } from '@/lib/db';
+import { prisma } from '@/lib/prisma'; // Adjust this path if needed
 
 const EXPECTED_HEADERS = ['oid', 'product_code', 'brand_name', 'product_name'];
 
@@ -68,31 +70,33 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const client = await pool.connect();
+    // Use Prisma transaction for atomicity: delete all, then insert new
     try {
-      await client.query('BEGIN');
+      await prisma.$transaction(async (tx) => {
+        // Delete all existing rows in product_master
+        await tx.productMaster.deleteMany({});
 
-      // Delete all existing rows before insert
-      await client.query('DELETE FROM product_master');
-
-      // Insert new rows
-      for (const row of rows) {
-        await client.query(
-          `INSERT INTO product_master (oid,product_code, brand_name, product_name)
-           VALUES ($1, $2, $3 , $4)`,
-          [row.oid, row.product_code, row.brand_name, row.product_name]
-        );
-      }
-
-      await client.query('COMMIT');
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
+        // Insert new rows using createMany for efficiency
+        // Ensure that the 'oid' field is properly handled as a unique identifier if applicable
+        // or that your Prisma schema allows for bulk insertion without unique constraint violations
+        await tx.productMaster.createMany({
+          data: rows.map(row => ({
+            oid: row.oid,
+            product_code: row.product_code,
+            brand_name: row.brand_name,
+            product_name: row.product_name,
+          })),
+          skipDuplicates: true, // Optional: if you want to skip rows that might cause unique constraint errors
+        });
+      });
+    } catch (error: any) {
+      // If any operation within the transaction fails, it will be rolled back automatically
+      console.error('Prisma transaction error during upload:', error);
+      // Re-throw to be caught by the outer catch block
+      throw new Error('Database transaction failed during product upload.');
     }
 
-    return NextResponse.json({ message: 'Upload and import successful', count: rows.length });
+    return NextResponse.json({ message: 'Upload and import successful', count: rows.length }, { status: 200 });
   } catch (err: unknown) {
     console.error(err);
     if (err instanceof Error) {

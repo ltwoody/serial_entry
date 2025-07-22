@@ -4,12 +4,62 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
-}
+
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// Define custom output path for generated Prisma Client
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+model User {
+  
+  username   String   @unique @map("username") // @map for consistency with provided table name if different from Prisma's PascalCase
+  password   String
+  firstname  String? // Nullable if not always required
+  lastname   String? // Nullable if not always required
+  createdAt  DateTime @default(now())
+  role       String? // Consider an Enum for roles if they are fixed
+
+
+  @@map("user_table") // Maps Prisma model User to your database table user_table
+}
+
+model SerialJob {
+  u_id          String
+  serial_number String   @unique
+  replace_serial String?
+  received_date DateTime @db.Date // <-- CHANGE THIS LINE
+  supplier      String?
+  date_receipt  DateTime? @db.Date // <-- CHANGE THIS LINE (if it's also a date-only field)
+  brand_name    String?
+  product_code  String?
+  product_name  String?
+  job_no        String?
+  condition     String?
+  remark        String?
+  count_round   Int?
+  create_by     String?
+  create_time   DateTime @default(now())
+  update_by     String?
+  update_time   DateTime @updatedAt
+  replace_code  String?
+  replace_product String?
+  rowuid        String   @id @unique @default(cuid())
+
+  @@map("serial_job")
+}
+
+model ProductMaster {
+  oid          Int      @id @default(autoincrement())
+  product_code String   @unique
+  brand_name   String?
+  product_name String?
+
+  @@map("product_master")
 }

@@ -1,36 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
-import { QueryResult } from 'pg'; // Import QueryResult type
+import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   const { SerialNo } = await req.json();
-  const client = await pool.connect();
+
+  if (!SerialNo) {
+    return NextResponse.json({ message: 'Serial number is required' }, { status: 400 });
+  }
+
+  const normalizedSerial = SerialNo.toLowerCase();
 
   try {
-    const normalizedSerial = SerialNo.toLowerCase();
+    // 🔍 Check if already used as `serial_number`
+    const existsAsSerial = await prisma.serialJob.findFirst({
+      where: {
+        serial_number: {
+          equals: normalizedSerial,
+          mode: 'insensitive',
+        },
+      },
+    });
 
-    // Check if the serial number is already used as serial_number
-    const dup: QueryResult = await client.query( // Explicitly type dup
-      'SELECT 1 FROM serial_job WHERE LOWER("serial_number") = $1',
-      [normalizedSerial]
-    );
-
-    // Option 1: Assert as number (recommended for this context)
-    if ((dup.rowCount as number) > 0) {
+    if (existsAsSerial) {
       return NextResponse.json(
         { message: 'serial_no already in use', isValid: false },
         { status: 400 }
       );
     }
 
-    // Check if it exists as a replace_serial
-    const replaceCheck: QueryResult = await client.query( // Explicitly type replaceCheck
-      'SELECT 1 FROM serial_job WHERE LOWER("replace_serial") = $1',
-      [normalizedSerial]
-    );
+    // 🔍 Check if exists as `replace_serial`
+    const existsAsReplace = await prisma.serialJob.findFirst({
+      where: {
+        replace_serial: {
+          equals: normalizedSerial,
+          mode: 'insensitive',
+        },
+      },
+    });
 
-    // Option 2: Use nullish coalescing (another valid approach)
-    if ((replaceCheck.rowCount ?? 0) > 0) {
+    if (existsAsReplace) {
       return NextResponse.json(
         {
           message: 'This serial number can be used but it is a replace serial number',
@@ -41,7 +49,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If not found anywhere
+    // ✅ If not found anywhere
     return NextResponse.json(
       { message: 'This serial number can be used', isValid: true },
       { status: 200 }
@@ -50,7 +58,5 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('Error checking serial number:', err);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  } finally {
-    client.release();
   }
 }

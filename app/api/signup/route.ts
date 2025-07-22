@@ -1,34 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-
+import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
-  const u_id = uuidv4();
-  const timecreate = new Date();
-  const { username, password, firstname, lastname } = await req.json();
-  const client = await pool.connect();
+  //const u_id = uuidv4();
+  const createdAt = new Date();
+  const { username, password, firstname, lastname , role } = await req.json();
 
   try {
-    const exists = await client.query('SELECT 1 FROM user_table WHERE username = $1', [username]);
-    if ((exists.rowCount as number) > 0) {
+    // ✅ Check if username already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (existingUser) {
       return NextResponse.json({ message: 'Username already exists' }, { status: 400 });
     }
 
+    // ✅ Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await client.query(
-      `INSERT INTO user_table (u_id,username,password,firstname,lastname, createdat,role)
-       VALUES ($1, $2, $3, $4, $5, $6 ,$7)`,
-      [u_id, username, hashedPassword, firstname, lastname, timecreate, 'users']
-    );
+    // ✅ Create the user in the database
+    await prisma.user.create({
+      data: {
+   
+        username,
+        password: hashedPassword,
+        firstname,
+        lastname,
+        createdAt,
+        role,
+      },
+    });
 
     return NextResponse.json({ message: 'User created' });
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  } finally {
-    client.release();
   }
 }

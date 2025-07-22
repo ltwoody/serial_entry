@@ -1,0 +1,3 @@
+u_id,username,password,firstname,lastname,createdat,role
+1,user001,$2b$10$o/eNftR3QT.sOjaHWwLGGuONlWAF4FC3YOz2gsy8hYIaTLcbZ3zUy,testuser,surnameuser,2025-07-22,users
+2,wdadmin3,$2b$10$vAR7V8.u3hfPGbMXwbaFpuD08ajx/Pl/5zx9jL8/O2I6VLozuql9i,wdwd,wdwd,2025-07-22,admin

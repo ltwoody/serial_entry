@@ -1,20 +1,21 @@
-
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import prisma from '@/lib/prisma'; // this replaces `pool`
 import bcrypt from 'bcrypt';
 
 export async function POST(req: NextRequest) {
   const { username, password } = await req.json();
-  const client = await pool.connect();
 
   try {
-    const result = await client.query('SELECT * FROM user_table WHERE username = $1', [username]);
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
 
-    if (result.rowCount === 0) {
+    if (!user) {
       return NextResponse.json({ message: 'Invalid credentials or user not found.' }, { status: 401 });
     }
 
-    const user = result.rows[0];
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ✅ Set auth cookie if login is successful
-    const response = NextResponse.json({ message: 'Login successful' , role: user.role});
+    const response = NextResponse.json({ message: 'Login successful', role: user.role });
 
     response.cookies.set({
       name: 'auth',
@@ -31,35 +32,33 @@ export async function POST(req: NextRequest) {
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24,
     });
 
     response.cookies.set({
-  name: 'user',
-  value: encodeURIComponent(user.username), // encode just in case
-  httpOnly: false, // must be accessible by client JS
-  path: '/',
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  maxAge: 60 * 60 * 24,
-});
+      name: 'user',
+      value: encodeURIComponent(user.username),
+      httpOnly: false,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24,
+    });
 
-response.cookies.set({
-  name: 'role',
-  value: encodeURIComponent(user.role), // encode just in case
-  httpOnly: false, // must be accessible by client JS
-  path: '/',
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  maxAge: 60 * 60 * 24,
-});
+    response.cookies.set({
+      name: 'role',
+      value: encodeURIComponent(user.role || ''), // default empty string if null
+      httpOnly: false,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24,
+    });
 
     return response;
 
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  } finally {
-    client.release();
   }
 }

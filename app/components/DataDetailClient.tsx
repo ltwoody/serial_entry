@@ -7,9 +7,11 @@ interface DataRecord {
   u_id: string;
   serial_number: string;
   replace_serial: string;
-  received_date: Date;
+  // Changed Date to string | null as dates are formatted in the server component
+  received_date: string | null;
   supplier: string;
-  date_receipt: Date;
+  // Changed Date to string | null as dates are formatted in the server component
+  date_receipt: string | null;
   brand_name: string;
   product_code: string;
   product_name: string;
@@ -22,9 +24,9 @@ interface DataRecord {
   replace_code: string;
   replace_product: string;
   rowuid: string;
+  // Add update_time to DataRecord interface as it's used and formatted
+  update_time: string | null;
 }
-
-
 
 export default function DataDetailClient({
   record,
@@ -34,8 +36,6 @@ export default function DataDetailClient({
   jobRecords: DataRecord[];
 }) {
   const router = useRouter();
-
-
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
@@ -56,10 +56,13 @@ export default function DataDetailClient({
         <table className="w-full table-auto text-sm text-left border border-gray-300 rounded-lg overflow-hidden">
           <tbody className="divide-y divide-gray-200">
             {Object.entries(record).map(([key, value]) =>
+              // Exclude 'reportid' and 'update_time' from the main record display
+              // as update_time is already formatted and might not need separate display here
+              // if it's implicitly part of the record. You can adjust this as needed.
               key !== 'reportid' ? (
                 <tr key={key} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-semibold text-gray-700 capitalize w-1/3 bg-gray-100">{key}</td>
-                  <td className="px-4 py-3 text-gray-900">{value}</td>
+                  <td className="px-4 py-3 font-semibold text-gray-700 capitalize w-1/3 bg-gray-100">{key.replace(/_/g, ' ')}</td> {/* Added replace for better display */}
+                  <td className="px-4 py-3 text-gray-900">{value !== null ? String(value) : 'N/A'}</td> {/* Handle null values gracefully */}
                 </tr>
               ) : null
             )}
@@ -97,7 +100,7 @@ export default function DataDetailClient({
                   <td className="px-4 py-2">{rec.product_name}</td>
                   <td className="px-4 py-2">{rec.replace_code}</td>
                   <td className="px-4 py-2">{rec.replace_product}</td>
-                  <td className="px-4 py-2">{rec.received_date.toLocaleString()}</td>
+                  <td className="px-4 py-2">{rec.received_date}</td> {/* Changed to display string directly */}
                 </tr>
               ))}
             </tbody>
