@@ -54,18 +54,17 @@ export async function GET(req: NextRequest) {
 
     // Define columns for the worksheet
     worksheet.columns = [
-      { header: 'Job No.', key: 'job_no', width: 15 },
-      { header: 'Serial Number', key: 'serial_number', width: 25 },
-      { header: 'Date Receipt', key: 'date_receipt', width: 15, style: { numFmt: 'yyyy-mm-dd' } },
+
       { header: 'Received Date', key: 'received_date', width: 15, style: { numFmt: 'yyyy-mm-dd' } },
+      { header: 'Serial Number', key: 'serial_number', width: 25 },
+      { header: 'Replace Serial', key: 'replace_serial', width: 25 },
+      { header: 'Date Receipt', key: 'date_receipt', width: 15, style: { numFmt: 'yyyy-mm-dd' } },
       { header: 'Supplier', key: 'supplier', width: 20 },
+      { header: 'Job No.', key: 'job_no', width: 15 },
       { header: 'Brand Name', key: 'brand_name', width: 20 },
       { header: 'Product Code', key: 'product_code', width: 15 },
       { header: 'Product Name', key: 'product_name', width: 30 },
-      { header: 'Replace Serial', key: 'replace_serial', width: 25 },
       { header: 'Count Round', key: 'count_round', width: 15 },
-      { header: 'U_ID', key: 'u_id', width: 20 },
-      { header: 'Row UID', key: 'rowuid', width: 35 },
     ];
 
     // Add rows to the worksheet
@@ -81,8 +80,6 @@ export async function GET(req: NextRequest) {
         product_name: record.product_name,
         replace_serial: record.replace_serial,
         count_round: record.count_round,
-        u_id: record.u_id,
-        rowuid: record.rowuid,
       });
     });
 

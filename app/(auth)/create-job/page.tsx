@@ -55,7 +55,7 @@ export default function CreateJob() {
         setError(data.message || 'Something went wrong');
         setSuccess('');
       } else {
-        setSuccess('✅ Traffic record created successfully!');
+        setSuccess('✅ Job record created successfully!');
         setError('');
         setForm(fields.reduce((acc, field) => ({ ...acc, [field.name]: '' }), {}));
 
@@ -173,7 +173,7 @@ export default function CreateJob() {
             type="submit"
             className="md:col-span-2 bg-gray-500 hover:bg-gray-700 transition text-white font-bold py-3 rounded-lg mt-4 shadow-lg"
           >
-            Submit Traffic
+            Submit Job
           </button>
         </form>
 

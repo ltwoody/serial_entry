@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Serial Entry App",
-  description: "TEST APP",
+  description: "Shokz Serial Entry",
 };
 
 export default function RootLayout({
