@@ -25,6 +25,8 @@ interface JobFilters {
   u_id: string;
   serial_number: string;
   received_date: string; // Filters are usually strings
+  received_date_from : string;
+  received_date_to : string;
   supplier: string;
   date_receipt: string; // Filters are usually strings
   product_code: string;
@@ -67,6 +69,8 @@ export default function JobReport() {
     u_id: '',
     serial_number: '',
     received_date: '',
+    received_date_from: '',
+    received_date_to: '',
     supplier: '',
     date_receipt: '',
     product_code: '',
@@ -224,6 +228,35 @@ export default function JobReport() {
               className="flex-1 min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           ))}
+
+          {/* Date range filters */}
+<div className="flex flex-wrap items-center gap-4"> {/* Added a wrapper div for better layout control */}
+  <div className="flex flex-col"> {/* Wrapper for each input and label */}
+    <label htmlFor="received_date_from" className="mb-1 text-sm font-medium text-gray-700">Received Date From:</label>
+    <input
+      type="date"
+      id="received_date_from" // Added id
+      name="received_date_from"
+      placeholder="Received Date From"
+      value={filters.received_date_from}
+      onChange={handleChange}
+      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+  </div>
+  <div className="flex flex-col"> {/* Wrapper for each input and label */}
+    <label htmlFor="received_date_to" className="mb-1 text-sm font-medium text-gray-700">Received Date To:</label>
+    <input
+      type="date"
+      id="received_date_to" // Added id
+      name="received_date_to"
+      placeholder="Received Date To"
+      value={filters.received_date_to}
+      onChange={handleChange}
+      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+  </div>
+</div>
+          
           <button
             onClick={fetchData}
             className="bg-gray-500 text-white px-5 py-2 rounded-md text-sm hover:bg-gray-700"
@@ -236,6 +269,8 @@ export default function JobReport() {
                 u_id: '',
                 serial_number: '',
                 received_date: '',
+                received_date_from: '',
+                received_date_to: '',
                 supplier: '',
                 date_receipt: '',
                 product_code: '',

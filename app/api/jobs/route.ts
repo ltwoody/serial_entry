@@ -13,11 +13,32 @@ export async function GET(req: NextRequest) {
     return value ? { contains: value, mode: 'insensitive' as const } : undefined;
   };
 
-  // Add filters conditionally
-  const received_date = url.searchParams.get('received_date');
-  if (received_date) {
-    filters.received_date = new Date(received_date);
+  // --- Date Range Filtering for received_date ---
+  const received_date_from = url.searchParams.get('received_date_from');
+  const received_date_to = url.searchParams.get('received_date_to');
+
+  if (received_date_from || received_date_to) {
+    filters.received_date = {}; // Initialize received_date as an object for range queries
+
+    if (received_date_from) {
+      // Set to the start of the day (00:00:00) for "from" date
+      filters.received_date.gte = new Date(received_date_from);
+    }
+    if (received_date_to) {
+      // Set to the end of the day (23:59:59) for "to" date to include the whole day
+      const dateTo = new Date(received_date_to);
+      dateTo.setHours(23, 59, 59, 999); // Set to end of the day
+      filters.received_date.lte = dateTo;
+    }
   }
+
+  const received_date_single = url.searchParams.get('received_date');
+  if (received_date_single && !received_date_from && !received_date_to) {
+    // Only apply if no range is provided
+    filters.received_date = new Date(received_date_single);
+  }
+
+
 
   const date_receipt = url.searchParams.get('date_receipt');
   if (date_receipt) {
@@ -52,6 +73,8 @@ export async function GET(req: NextRequest) {
 
   const rowuid = getStringFilter('rowuid');
   if (rowuid) filters.rowuid = rowuid;
+
+
 
   try {
     const results = await prisma.serialJob.findMany({
