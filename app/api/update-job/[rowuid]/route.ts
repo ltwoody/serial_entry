@@ -16,6 +16,10 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
 
     const {
+      serial_number,
+      date_receipt,
+      received_date,
+      supplier,
       replace_serial,
       job_no,
       condition,
@@ -30,12 +34,50 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ message: 'Missing update_by in request body' }, { status: 400 });
     }
 
+    // --- Start of Date Conversion ---
+    // Convert date strings (YYYY-MM-DD) to Date objects for Prisma
+    let parsedDateReceipt: Date | null = null;
+    if (date_receipt) {
+        try {
+            // Using new Date() with YYYY-MM-DD format correctly parses to UTC midnight for that date
+            parsedDateReceipt = new Date(date_receipt);
+            // Optional: If you want to ensure it's a valid date and not "Invalid Date"
+            if (isNaN(parsedDateReceipt.getTime())) {
+                parsedDateReceipt = null; // Treat as null if invalid
+            }
+        } catch (e) {
+            console.warn(`Could not parse date_receipt: ${date_receipt}`, e);
+            parsedDateReceipt = null; // Set to null if parsing fails
+        }
+    }
+
+    let parsedReceivedDate: Date | null = null;
+    if (received_date) {
+        try {
+            parsedReceivedDate = new Date(received_date);
+            if (isNaN(parsedReceivedDate.getTime())) {
+                parsedReceivedDate = null;
+            }
+        } catch (e) {
+            console.warn(`Could not parse received_date: ${received_date}`, e);
+            parsedReceivedDate = null;
+        }
+    }
+    // --- End of Date Conversion ---
+
+
+
     // Use Prisma to update the record
     const updatedJob = await prisma.serialJob.update({
       where: {
         rowuid: rowuid, // Identify the record to update by its unique rowuid
       },
       data: {
+        serial_number,
+        // Use the parsed Date objects here
+        date_receipt: parsedDateReceipt,
+        received_date: parsedReceivedDate,
+        supplier,
         replace_serial,
         job_no,
         condition,

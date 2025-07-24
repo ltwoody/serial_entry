@@ -216,18 +216,36 @@ export default function JobReport() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
-          {/* Cast 'field' to a key of JobFilters */}
-          {(['serial_number', 'supplier'] as Array<keyof JobFilters>).map((field) => (
-            <input
-              key={field}
-              type="text"
-              name={field}
-              placeholder={`Filter by ${field}`}
-              value={filters[field] ?? ''} // Now TypeScript knows 'field' is a valid key
-              onChange={handleChange}
-              className="flex-1 min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          ))}
+          
+  <div className="flex flex-wrap items-center gap-4"> {/* Added a wrapper div for better layout control */}
+  <div className="flex flex-col"> {/* Wrapper for each input and label */}
+    <label htmlFor="serial_number" className="mb-1 text-sm font-medium text-gray-700">Serial Number:</label>
+    <input
+      type="text"
+      id="serial_number" // Added id
+      name="serial_number"
+      placeholder="Serial"
+      value={filters.serial_number}
+      onChange={handleChange}
+      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+  </div>
+  </div>
+
+  <div className="flex flex-wrap items-center gap-4"> {/* Added a wrapper div for better layout control */}
+  <div className="flex flex-col"> {/* Wrapper for each input and label */}
+    <label htmlFor="supplier" className="mb-1 text-sm font-medium text-gray-700">Supplier:</label>
+    <input
+      type="text"
+      id="supplier" // Added id
+      name="supplier"
+      placeholder="Supplier"
+      value={filters.supplier}
+      onChange={handleChange}
+      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+  </div>
+  </div>
 
           {/* Date range filters */}
 <div className="flex flex-wrap items-center gap-4"> {/* Added a wrapper div for better layout control */}
