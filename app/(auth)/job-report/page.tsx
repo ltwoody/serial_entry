@@ -214,111 +214,121 @@ export default function JobReport() {
       <div className="bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Job Report</h1>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          
-  <div className="flex flex-wrap items-center gap-4"> {/* Added a wrapper div for better layout control */}
-  <div className="flex flex-col"> {/* Wrapper for each input and label */}
-    <label htmlFor="serial_number" className="mb-1 text-sm font-medium text-gray-700">Serial Number:</label>
-    <input
-      type="text"
-      id="serial_number" // Added id
-      name="serial_number"
-      placeholder="Serial"
-      value={filters.serial_number}
-      onChange={handleChange}
-      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    />
-  </div>
-  </div>
+        {/* Filters and Buttons Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* First Column of Filters */}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col">
+              <label htmlFor="job_no" className="mb-1 text-sm font-medium text-gray-700">Job No:</label>
+              <input
+                type="text"
+                id="job_no"
+                name="job_no"
+                placeholder="Job No."
+                value={filters.job_no}
+                onChange={handleChange}
+                className="w-full rounded-md border border-gray-300  bg-blue-100 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="serial_number" className="mb-1 text-sm font-medium text-gray-700">Serial Number:</label>
+              <input
+                type="text"
+                id="serial_number"
+                name="serial_number"
+                placeholder="Serial"
+                value={filters.serial_number}
+                onChange={handleChange}
+                className="w-full rounded-md border border-gray-300 bg-blue-100 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="supplier" className="mb-1 text-sm font-medium text-gray-700">Supplier:</label>
+              <input
+                type="text"
+                id="supplier"
+                name="supplier"
+                placeholder="Supplier"
+                value={filters.supplier}
+                onChange={handleChange}
+                className="w-full rounded-md border border-gray-300 bg-blue-100 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
 
-  <div className="flex flex-wrap items-center gap-4"> {/* Added a wrapper div for better layout control */}
-  <div className="flex flex-col"> {/* Wrapper for each input and label */}
-    <label htmlFor="supplier" className="mb-1 text-sm font-medium text-gray-700">Supplier:</label>
-    <input
-      type="text"
-      id="supplier" // Added id
-      name="supplier"
-      placeholder="Supplier"
-      value={filters.supplier}
-      onChange={handleChange}
-      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    />
-  </div>
-  </div>
+          {/* Second Column of Filters (Date Range) */}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col">
+              <label htmlFor="received_date_from" className="mb-1 text-sm font-medium text-gray-700">Received Date From:</label>
+              <input
+                type="date"
+                id="received_date_from"
+                name="received_date_from"
+                value={filters.received_date_from}
+                onChange={handleChange}
+                className="w-full rounded-md border border-gray-300 bg-blue-100 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="received_date_to" className="mb-1 text-sm font-medium text-gray-700">Received Date To:</label>
+              <input
+                type="date"
+                id="received_date_to"
+                name="received_date_to"
+                value={filters.received_date_to}
+                onChange={handleChange}
+                className="w-full rounded-md border border-gray-300 bg-blue-100 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
 
-          {/* Date range filters */}
-<div className="flex flex-wrap items-center gap-4"> {/* Added a wrapper div for better layout control */}
-  <div className="flex flex-col"> {/* Wrapper for each input and label */}
-    <label htmlFor="received_date_from" className="mb-1 text-sm font-medium text-gray-700">Received Date From:</label>
-    <input
-      type="date"
-      id="received_date_from" // Added id
-      name="received_date_from"
-      placeholder="Received Date From"
-      value={filters.received_date_from}
-      onChange={handleChange}
-      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    />
-  </div>
-  <div className="flex flex-col"> {/* Wrapper for each input and label */}
-    <label htmlFor="received_date_to" className="mb-1 text-sm font-medium text-gray-700">Received Date To:</label>
-    <input
-      type="date"
-      id="received_date_to" // Added id
-      name="received_date_to"
-      placeholder="Received Date To"
-      value={filters.received_date_to}
-      onChange={handleChange}
-      className="min-w-[150px] rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    />
-  </div>
-</div>
-          
-          <button
-            onClick={fetchData}
-            className="bg-gray-500 text-white px-5 py-2 rounded-md text-sm hover:bg-gray-700"
-          >
-            Search
-          </button>
-          <button
-            onClick={() => {
-              setFilters({
-                u_id: '',
-                serial_number: '',
-                received_date: '',
-                received_date_from: '',
-                received_date_to: '',
-                supplier: '',
-                date_receipt: '',
-                product_code: '',
-                brand_name: '',
-                job_no: '',
-                product_name: '',
-                replace_serial: '',
-                count_round: '',
-                rowuid: '',
-              });
-              setRecords([]);
-              setHasQueried(false);
-              setSearchTerm('');
-            }}
-            className=" bg-red-400 text-white px-5 py-2 rounded-md text-sm hover:bg-red-600"
-          >
-            Clear
-          </button>
-
-          {/* Export Button - Visible only to admin */}
-          {role === 'admin' && (
+          {/* Buttons - Spanning both columns */}
+          <div className="col-span-full flex flex-wrap gap-4 mt-2">
             <button
-              onClick={handleExport}
-              className="bg-green-500 text-white px-5 py-2 rounded-md text-sm hover:bg-green-700 flex items-center gap-2"
-              title="Export data to Excel"
+              onClick={fetchData}
+              className="bg-gray-500 text-white px-5 py-2 rounded-md text-sm hover:bg-gray-700"
             >
-              <FileText size={18} />
-              Export
+              Search
             </button>
-          )}
+            <button
+              onClick={() => {
+                setFilters({
+                  u_id: '',
+                  serial_number: '',
+                  received_date: '',
+                  received_date_from: '',
+                  received_date_to: '',
+                  supplier: '',
+                  date_receipt: '',
+                  product_code: '',
+                  brand_name: '',
+                  job_no: '',
+                  product_name: '',
+                  replace_serial: '',
+                  count_round: '',
+                  rowuid: '',
+                });
+                setRecords([]);
+                setHasQueried(false);
+                setSearchTerm('');
+              }}
+              className=" bg-red-400 text-white px-5 py-2 rounded-md text-sm hover:bg-red-600"
+            >
+              Clear
+            </button>
+
+            {/* Export Button - Visible only to admin */}
+            {role === 'admin' && (
+              <button
+                onClick={handleExport}
+                className="bg-green-500 text-white px-5 py-2 rounded-md text-sm hover:bg-green-700 flex items-center gap-2"
+                title="Export data to Excel"
+              >
+                <FileText size={18} />
+                Export
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Search Bar */}
