@@ -98,7 +98,7 @@ export default function DataDetailClient({
             Back
           </button>
           <h1 className="text-2xl font-extrabold text-gray-800"> {/* Larger and bolder heading */}
-            📊 Job Detail - <span className="text-blue-600">ID {record.u_id}</span>
+            📊 Job Detail - <span className="text-blue-600">ROWUID: {record.rowuid}</span>
           </h1>
         </div>
 
@@ -137,7 +137,7 @@ export default function DataDetailClient({
 
      <div className="bg-white rounded-2xl shadow-xl max-w-7xl mx-auto p-8">
         <h2 className="text-xl font-bold text-gray-800 mb-6">
-          🔄 Other Records in Relation: <span className="text-blue-600">{record.u_id}</span>
+          🔄 Other Records in same u_id: <span className="text-blue-600">{record.u_id}</span>
         </h2>
         <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
           {/* Pay close attention to this block below for whitespace */}

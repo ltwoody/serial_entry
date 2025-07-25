@@ -27,6 +27,8 @@ export default function CreateJob() {
 
   
 
+  
+
   const handleSubmit = async () => {
     const payload = {
       ...form,
@@ -82,6 +84,7 @@ export default function CreateJob() {
             e.preventDefault();
             handleSubmit();
           }}
+          
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {fields.map(({ name, label, type }) => (

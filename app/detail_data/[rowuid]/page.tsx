@@ -1,17 +1,14 @@
-// app/detail_data/[u_id]/page.tsx
+// app/(auth)/detail_data/[rowuid]/page.tsx
 
 // ✅ This ensures the page is always rendered dynamically, fetching fresh data on each request.
 export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
-import DataDetailClient from '@/app/components/DataDetailClient';
-
-// update
+import DataDetailClient from '@/app/components/DataDetailClient'; // Adjust path if necessary
 
 // This is the standard pattern to prevent multiple Prisma Client instances in development.
 declare global {
-  // The 'var' keyword is necessary for global declarations.
   var prisma: PrismaClient | undefined;
 }
 
@@ -21,47 +18,47 @@ if (process.env.NODE_ENV === 'development') {
   global.prisma = prisma;
 }
 
-// Defines the props type according to the error message, expecting a Promise for params.
+// Defines the props type, now correctly expecting 'rowuid' directly in params.
 interface DataDetailProps {
-  params: Promise<{
-    u_id: string;
-  }>;
+  params: {
+    rowuid: string; // Changed from 'u_id' to 'rowuid' and removed 'Promise'
+  };
 }
 
 export default async function DataDetail({ params }: DataDetailProps) {
-  // Await the params object to resolve the Promise and get the u_id.
-  const resolvedParams = await params;
-  const { u_id } = resolvedParams;
+  // Destructure 'rowuid' directly from params.
+  const { rowuid } = await params;
 
-  // Helper function to format dates that can be null.
-  const formatDate = (date?: Date | string | null): string | null => {
+  // Helper function to ensure dates are consistently passed as ISO strings or null.
+  // The DataDetailClient component will then format these strings for display.
+  const ensureDateToISOStringOrNull = (date?: Date | string | null): string | null => {
     if (!date) return null;
     const d = new Date(date);
-    if (isNaN(d.getTime())) return null; // Check for invalid date
-    return d.toISOString().split('T')[0];
+    // Return ISO string if valid date, otherwise null
+    return isNaN(d.getTime()) ? null : d.toISOString();
   };
 
   try {
-    // Fetch the first record matching the u_id.
-    const record = await prisma.serialJob.findFirst({
-      where: { u_id },
+    // 1. Fetch the specific record matching the 'rowuid' from the URL.
+    // We use findUnique because 'rowuid' is expected to be a unique identifier.
+    const record = await prisma.serialJob.findUnique({
+      where: { rowuid }, // IMPORTANT: Changed to fetch by 'rowuid'
     });
 
-    // If no record is found, render the 404 page.
+    // If no record is found for the given rowuid, render the 404 page.
     if (!record) {
       notFound();
     }
 
-    // Format the record, ensuring all nullable fields from the schema are handled
-    // before being passed to the client component.
+    // 2. Format the primary record data before passing it to the client component.
+    // This ensures consistency and handles nullable fields.
     const formattedRecord = {
       ...record,
-      // Non-nullable dates can be formatted directly.
-      received_date: formatDate(record.received_date),
-      update_time: new Date(record.update_time).toISOString().split('T')[0],
-      // Nullable date uses the helper function.
-      date_receipt: formatDate(record.date_receipt),
-      // Convert all nullable string fields to empty strings.
+      // Convert Date objects to ISO strings, allowing DataDetailClient to format them.
+      received_date: ensureDateToISOStringOrNull(record.received_date),
+      update_time: ensureDateToISOStringOrNull(record.update_time),
+      date_receipt: ensureDateToISOStringOrNull(record.date_receipt),
+      // Ensure all nullable string fields default to an empty string.
       replace_serial: record.replace_serial ?? '',
       supplier: record.supplier ?? '',
       brand_name: record.brand_name ?? '',
@@ -74,24 +71,25 @@ export default async function DataDetail({ params }: DataDetailProps) {
       update_by: record.update_by ?? '',
       replace_code: record.replace_code ?? '',
       replace_product: record.replace_product ?? '',
-      // Convert nullable number to string.
+      // Convert nullable number to string, as DataDetailClient expects 'count_round' as string.
       count_round: (record.count_round ?? 0).toString(),
     };
 
-    // Fetch all related records, ordered by count_round.
+    // 3. Fetch all related records using the 'u_id' from the *specifically fetched record*.
+    // This ensures the "Other Records" table displays all entries associated with the same 'u_id'.
     const jobRecords = await prisma.serialJob.findMany({
-      where: { u_id },
+      where: { u_id: record.u_id }, // Use the 'u_id' from the 'record' we just fetched
       orderBy: {
-        count_round: 'asc',
+        count_round: 'asc', // Keep the ordering for consistency
       },
     });
 
-    // Format all related job records with the same logic.
+    // 4. Format all related job records using the same logic as the primary record.
     const formattedJobRecords = jobRecords.map(r => ({
       ...r,
-      received_date: formatDate(r.received_date),
-      update_time: new Date(r.update_time).toISOString().split('T')[0],
-      date_receipt: formatDate(r.date_receipt),
+      received_date: ensureDateToISOStringOrNull(r.received_date),
+      update_time: ensureDateToISOStringOrNull(r.update_time),
+      date_receipt: ensureDateToISOStringOrNull(r.date_receipt),
       replace_serial: r.replace_serial ?? '',
       supplier: r.supplier ?? '',
       brand_name: r.brand_name ?? '',
@@ -104,7 +102,6 @@ export default async function DataDetail({ params }: DataDetailProps) {
       update_by: r.update_by ?? '',
       replace_code: r.replace_code ?? '',
       replace_product: r.replace_product ?? '',
-      // Convert nullable number to string.
       count_round: (r.count_round ?? 0).toString(),
     }));
 

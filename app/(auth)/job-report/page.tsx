@@ -390,7 +390,7 @@ export default function JobReport() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/detail_data/${rec.u_id}`);
+                                router.push(`/detail_data/${rec.rowuid}`);
                               }}
                               className="hover:text-blue-600"
                               title="View"
