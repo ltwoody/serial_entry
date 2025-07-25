@@ -53,12 +53,17 @@ export default function EditJobClient({ rowuid }: EditJobClientProps) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [username, setUsername] = useState('');
+    const [userRole, setUserRole] = useState(''); // State to store user role
 
     useEffect(() => {
-        const cookieUser = decodeURIComponent(
-            document.cookie.split('; ').find(row => row.startsWith('user='))?.split('=')[1] || ''
-        );
-        setUsername(cookieUser);
+        const cookies = document.cookie.split('; ').reduce((acc, current) => {
+            const [key, value] = current.split('=');
+            acc[key] = decodeURIComponent(value);
+            return acc;
+        }, {} as Record<string, string>);
+
+        setUsername(cookies.user || '');
+        setUserRole(cookies.role || ''); // Assuming 'role' cookie exists
     }, []);
 
     useEffect(() => {
@@ -138,11 +143,7 @@ export default function EditJobClient({ rowuid }: EditJobClientProps) {
             received_date: form.received_date,
             serial_number: form.serial_number,
             supplier: form.supplier,
-            // Assuming product_code and product_name are part of the original job record
-            // If they are not in the form state, they won't be sent unless explicitly added
-            // based on the original data fetched (record.product_code, etc.)
-            // For now, let's stick to fields from the `form` state as per payload structure
-            // in the previous turn. If product_code/name need to be updated, they need inputs.
+            count_round: form.count_round, // Include count_round in payload
             update_by: username || 'unknown', // Pass username as update_by
         };
 
@@ -193,7 +194,7 @@ export default function EditJobClient({ rowuid }: EditJobClientProps) {
         [
             { key: 'u_id', label: 'U ID', readOnly: true },
             { key: 'rowuid', label: 'Row UID', readOnly: true },
-            { key: 'count_round', label: 'ครั้งที่เคลม', readOnly: true, type: 'text' },
+            { key: 'count_round', label: 'ครั้งที่เคลม', type: 'text', readOnly: userRole !== 'admin' }, // Conditionally readOnly based on userRole // Conditionally readOnly based on userRole
             // You could also add `update_by` here as a read-only field if you want to show it.
             // { key: 'update_by', label: 'Last Updated By', type: 'text', readOnly: true },
         ],
@@ -229,7 +230,8 @@ export default function EditJobClient({ rowuid }: EditJobClientProps) {
 
                                     const isTextArea = field.type === 'textarea';
                                     const InputComponent = isTextArea ? 'textarea' : 'input';
-                                    const isFieldReadOnly = field.readOnly; // Use the readOnly property from columnDefinitions
+                                    // Check if the field is 'count_round' and if the user is not an admin
+                                    const isFieldReadOnly = field.readOnly || (field.key === 'count_round' && userRole !== 'admin');
 
                                     return (
                                         <div key={field.key} className="mb-5 last:mb-0">

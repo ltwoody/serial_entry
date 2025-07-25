@@ -26,6 +26,7 @@ export async function PUT(req: NextRequest) {
       remark,
       replace_code,
       replace_product,
+      count_round,
       update_by,
     } = body;
 
@@ -84,6 +85,7 @@ export async function PUT(req: NextRequest) {
         remark,
         replace_code,
         replace_product,
+        count_round: Number(count_round),
         update_by,
         update_time: new Date(), // Set update_time to current timestamp
       },
