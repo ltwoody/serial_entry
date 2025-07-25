@@ -19,6 +19,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Defines the props type, now correctly expecting 'rowuid' directly in params.
+// update to use promise
 interface DataDetailProps {
   params: Promise<{rowuid: string}>
 }
