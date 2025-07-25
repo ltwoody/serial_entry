@@ -20,14 +20,12 @@ if (process.env.NODE_ENV === 'development') {
 
 // Defines the props type, now correctly expecting 'rowuid' directly in params.
 interface DataDetailProps {
-  params: {
-    rowuid: string; // Changed from 'u_id' to 'rowuid' and removed 'Promise'
-  };
+  params: Promise<{rowuid: string}>
 }
 
 export default async function DataDetail({ params }: DataDetailProps) {
   // Destructure 'rowuid' directly from params.
-  const { rowuid } = await params;
+  const rowuid  = (await params).rowuid;
 
   // Helper function to ensure dates are consistently passed as ISO strings or null.
   // The DataDetailClient component will then format these strings for display.
