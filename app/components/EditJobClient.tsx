@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react'; // Import ArrowLeft icon for back butt
 interface JobRecord {
     u_id: string;
     rowuid: string;
+    brand_name: string;
     serial_number: string;
     product_code: string;
     product_name: string;
@@ -126,12 +127,21 @@ export default function EditJobClient({ rowuid }: EditJobClientProps) {
         setForm(prev => (prev ? { ...prev, [name]: value } : prev));
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+        // Check if the pressed key is 'Enter'
+        if (e.key === 'Enter') {
+            // Prevent the default form submission behavior
+            e.preventDefault();
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form) return;
 
         const payload = {
             job_no: form.job_no,
+            brand_name: form.brand_name,
             replace_serial: form.replace_serial,
             product_code: form.product_code,
             product_name: form.product_name,
@@ -174,6 +184,7 @@ export default function EditJobClient({ rowuid }: EditJobClientProps) {
             { key: 'date_receipt', label: 'วันที่ใบเสร็จ', type: 'date', readOnly: false },
             { key: 'received_date', label: 'วันที่รับของ', type: 'date', readOnly: false },
             { key: 'supplier', label: 'ชื่อ Supplier', type: 'text', readOnly: false },
+            { key: 'brand_name', label: 'Brand Name', type: 'text', readOnly: false },
         ],
         // Column 2: Job & Product Information
         [
@@ -216,7 +227,7 @@ export default function EditJobClient({ rowuid }: EditJobClientProps) {
                     </h1>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+                <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="grid grid-cols-1 gap-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-6 p-6 border border-gray-200 rounded-xl bg-gray-50">
                         {columnDefinitions.map((fieldsInColumn, colIndex) => (
                             <div key={colIndex} className="flex flex-col">

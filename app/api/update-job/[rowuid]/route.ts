@@ -17,6 +17,9 @@ export async function PUT(req: NextRequest) {
 
     const {
       serial_number,
+      product_code,
+      product_name,
+      brand_name,
       date_receipt,
       received_date,
       supplier,
@@ -75,6 +78,8 @@ export async function PUT(req: NextRequest) {
       },
       data: {
         serial_number,
+        product_code,
+        product_name,
         // Use the parsed Date objects here
         date_receipt: parsedDateReceipt,
         received_date: parsedReceivedDate,
@@ -82,6 +87,7 @@ export async function PUT(req: NextRequest) {
         replace_serial,
         job_no,
         condition,
+        brand_name,
         remark,
         replace_code,
         replace_product,
