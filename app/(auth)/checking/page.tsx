@@ -1,5 +1,6 @@
 'use client';
 
+
 import { useState } from 'react';
 
 export default function CheckingPage() {
@@ -44,6 +45,7 @@ export default function CheckingPage() {
   };
 
   return (
+    <div className='pt-36 min-w-full min-h-full'>
     <main className="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Check Serial Number</h1>
 
@@ -75,5 +77,7 @@ export default function CheckingPage() {
         </p>
       )}
     </main>
+    </div>
+   
   );
 }
