@@ -9,9 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <Navbar />
-     
-      
-        <main className={`flex-1 overflow-y-auto pt-20  transition-all duration-300`}>
+        <main className={`flex-1 overflow-y-auto   transition-all duration-300`}>
           {children}
         </main>
         

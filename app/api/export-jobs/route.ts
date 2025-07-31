@@ -14,6 +14,7 @@ interface JobRecord {
   replace_serial: string;
   count_round: number;
   rowuid: string;
+  condition: string;
 }
 
 export async function GET(req: NextRequest) {
@@ -58,6 +59,7 @@ export async function GET(req: NextRequest) {
       { header: 'Received Date', key: 'received_date', width: 15, style: { numFmt: 'yyyy-mm-dd' } },
       { header: 'Serial Number', key: 'serial_number', width: 25 },
       { header: 'Replace Serial', key: 'replace_serial', width: 25 },
+      { header: 'Condition', key: 'condition', width: 30 },
       { header: 'Date Receipt', key: 'date_receipt', width: 15, style: { numFmt: 'yyyy-mm-dd' } },
       { header: 'Supplier', key: 'supplier', width: 20 },
       { header: 'Job No.', key: 'job_no', width: 15 },
@@ -72,6 +74,7 @@ export async function GET(req: NextRequest) {
       worksheet.addRow({
         job_no: record.job_no,
         serial_number: record.serial_number,
+        condition: record.condition,
         date_receipt: record.date_receipt,
         received_date: record.received_date,
         supplier: record.supplier,

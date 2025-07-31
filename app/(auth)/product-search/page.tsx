@@ -63,7 +63,7 @@ export default function ProductSearchPage() {
   }, [filteredProducts, currentPage]);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-6 pt-28">
       <h1 className="text-3xl font-bold mb-6 text-center">Product Search</h1>
 
       <div className="flex mb-6">

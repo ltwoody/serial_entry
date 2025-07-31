@@ -140,7 +140,7 @@ export default function Navbar() {
         </div>
 
         {/* User Status and Logout Button */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center text-center space-x-4">
           {username && (
             <div className="flex flex-col text-sm leading-tight">
               <span className="text-black">
@@ -151,12 +151,14 @@ export default function Navbar() {
               </span>
             </div>
           )}
+          <div className='px-10'>
           <button
             onClick={handleLogout}
-            className="bg-red-400 text-white font-bold px-4 py-2 rounded hover:bg-red-600 transition"
+            className="bg-gray-700 text-white font-bold px-4 py-2 rounded hover:bg-red-400 transition"
           >
             Logout
           </button>
+        </div>
         </div>
       </div>
 

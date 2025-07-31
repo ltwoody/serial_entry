@@ -73,7 +73,7 @@ export default function CreateJob() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br pt-20 from-gray-100 to-gray-300 p-6">
       <div className="bg-white shadow-2xl rounded-2xl p-10 w-full max-w-4xl">
         <h1 className="text-3xl font-extrabold mb-8 text-center text-gray-700">
            Create Job

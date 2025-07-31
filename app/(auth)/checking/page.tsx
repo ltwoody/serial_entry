@@ -45,8 +45,8 @@ export default function CheckingPage() {
   };
 
   return (
-    <div className='pt-36 min-w-full min-h-full'>
-    <main className="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow">
+    <div className="min-h-screen  flex items-center bg-gray-300 ">
+    <div className="max-w-md mx-auto mt-16 p-10 rounded-2xl bg-white  shadow">
       <h1 className="text-2xl font-bold mb-4">Check Serial Number</h1>
 
       <input
@@ -76,7 +76,7 @@ export default function CheckingPage() {
           {message}
         </p>
       )}
-    </main>
+    </div>
     </div>
    
   );
