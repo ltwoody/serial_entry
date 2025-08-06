@@ -15,6 +15,9 @@ interface JobRecord {
   count_round: number;
   rowuid: string;
   condition: string;
+  remark: string;
+  create_by: string;
+  update_by: string;
 }
 
 export async function GET(req: NextRequest) {
@@ -60,6 +63,7 @@ export async function GET(req: NextRequest) {
       { header: 'Serial Number', key: 'serial_number', width: 25 },
       { header: 'Replace Serial', key: 'replace_serial', width: 25 },
       { header: 'Condition', key: 'condition', width: 30 },
+      { header: 'Remark', key: 'remark', width: 30 },
       { header: 'Date Receipt', key: 'date_receipt', width: 15, style: { numFmt: 'yyyy-mm-dd' } },
       { header: 'Supplier', key: 'supplier', width: 20 },
       { header: 'Job No.', key: 'job_no', width: 15 },
@@ -67,6 +71,8 @@ export async function GET(req: NextRequest) {
       { header: 'Product Code', key: 'product_code', width: 15 },
       { header: 'Product Name', key: 'product_name', width: 30 },
       { header: 'Count Round', key: 'count_round', width: 15 },
+      { header: 'Create By', key: 'create_by', width: 30 },
+      { header: 'Update By', key: 'update_by', width: 30 },
     ];
 
     // Add rows to the worksheet
@@ -75,6 +81,7 @@ export async function GET(req: NextRequest) {
         job_no: record.job_no,
         serial_number: record.serial_number,
         condition: record.condition,
+        remark: record.remark,
         date_receipt: record.date_receipt,
         received_date: record.received_date,
         supplier: record.supplier,
@@ -83,6 +90,8 @@ export async function GET(req: NextRequest) {
         product_name: record.product_name,
         replace_serial: record.replace_serial,
         count_round: record.count_round,
+        create_by: record.create_by,
+        update_by: record.update_by,
       });
     });
 
