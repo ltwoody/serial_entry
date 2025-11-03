@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3002:3000"
+    environment:
+      - DATABASE_URL=postgresql://username:password@host.docker.internal:5432/dbname
+    network_mode: "bridge"
