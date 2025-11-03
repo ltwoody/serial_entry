@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Prevent webpack errors on the client for Node.js modules
